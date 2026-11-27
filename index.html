@@ -2,495 +2,535 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
-<title>七宗罪 × 七美德 · 灵魂图谱</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<title>七宗罪 · 七美德 | 灵魂天平测试</title>
 <style>
+/* ============ 基础 ============ */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden}
+:root{
+  --serif:"Songti SC","STSong","Noto Serif SC",Georgia,"Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+html,body{height:100%;width:100%;overflow:hidden}
 body{
-  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-  color:#e9e2ee;background:#050308;
-  transition:background 1s cubic-bezier(.4,0,.2,1),color 1s;
+  font-family:var(--sans);
+  background:#08070c;color:#e8e6f0;
+  transition:background .9s ease,color .9s ease;
   -webkit-font-smoothing:antialiased;
 }
-body.light-mode{color:#241f1a;background:#f6f1e9}
-body::before{
-  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:radial-gradient(ellipse 90% 60% at 50% 0%,#1e0f2b 0%,#0c0614 45%,#050308 100%);
-  transition:opacity 1s;
+
+body.theme-sin{
+  --accent:#ff3b6b; --accent2:#a855f7; --accent-soft:rgba(255,59,107,.13);
+  --card-bg:rgba(24,18,34,.72); --card-border:rgba(255,255,255,.09);
+  --text:#ece9f5; --dim:#8e88a6;
+  --shadow:0 30px 80px rgba(139,92,246,.22);
+  background:#08070c;color:#ece9f5;
 }
-body.light-mode::before{
-  background:radial-gradient(ellipse 90% 60% at 50% 0%,#ffffff 0%,#f7f2ea 45%,#efe8dd 100%);
+body.theme-holy{
+  --accent:#c8a13a; --accent2:#e3cf9a; --accent-soft:rgba(200,161,58,.14);
+  --card-bg:rgba(255,255,255,.72); --card-border:rgba(190,168,124,.35);
+  --text:#2b2620; --dim:#8f8677;
+  --shadow:0 30px 80px rgba(200,161,58,.16);
+  background:#faf7f1;color:#2b2620;
 }
-#bgCanvas{position:fixed;inset:0;z-index:1;pointer-events:none}
-.noise-layer{
-  position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.045;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
-  mix-blend-mode:overlay;
+body.theme-result{
+  --accent:#d9b25c; --accent2:#ff5b7f; --accent-soft:rgba(217,178,92,.12);
+  --card-bg:rgba(255,255,255,.045); --card-border:rgba(255,255,255,.10);
+  --text:#f0ecf7; --dim:#948da8;
+  --shadow:0 30px 80px rgba(0,0,0,.55);
+  background:#0a0810;color:#f0ecf7;
 }
+
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#app{position:relative;z-index:1}
+
 .screen{
-  position:fixed;inset:0;z-index:5;opacity:0;visibility:hidden;
-  transition:opacity .7s cubic-bezier(.4,0,.2,1),visibility .7s;
-  overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
-  display:flex;flex-direction:column;
+  position:fixed;inset:0;display:none;
+  overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  z-index:1;
 }
-.screen.show{opacity:1;visibility:visible}
+.screen.active{display:flex}
 
-/* ============ 封面 ============ */
-#intro{align-items:center;justify-content:center;padding:40px 26px;text-align:center}
-.intro-halo{
-  position:absolute;top:50%;left:50%;width:min(560px,140vw);height:min(560px,140vw);
-  transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle,rgba(160,60,200,.18) 0%,rgba(120,30,60,.10) 40%,transparent 70%);
-  animation:breathe 6s ease-in-out infinite;
-}
-@keyframes breathe{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.8}50%{transform:translate(-50%,-50%) scale(1.15);opacity:1}}
-.intro-kicker{
-  font-size:10px;letter-spacing:.42em;color:#8a6a9a;margin-bottom:26px;
-  text-transform:uppercase;animation:fadeUp .9s .1s both;
-}
-.intro-title{
-  font-family:"Songti SC","Noto Serif SC",Georgia,serif;
-  font-size:clamp(38px,12vw,62px);font-weight:400;line-height:1.15;letter-spacing:.06em;
-  animation:fadeUp .9s .22s both;position:relative;
-}
-.intro-title .l1{
-  display:block;
-  background:linear-gradient(135deg,#e05a7a 0%,#a83c8c 50%,#6a3fa0 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-}
-.intro-title .amp{
-  display:block;font-size:.42em;color:#d4af37;margin:6px 0;letter-spacing:0;
-  font-family:Georgia,serif;opacity:.85;
-}
-.intro-title .l2{
-  display:block;
-  background:linear-gradient(135deg,#ffffff 0%,#ffe9c4 40%,#d4af37 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-}
-.intro-sub{
-  margin-top:30px;font-size:13.5px;line-height:2;color:#a094ac;letter-spacing:.12em;
-  animation:fadeUp .9s .36s both;
-}
-.intro-meta{
-  display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
-  margin-top:34px;font-size:9.5px;letter-spacing:.24em;color:#6d6178;
-  animation:fadeUp .9s .48s both;
-}
-.intro-meta i{width:3px;height:3px;border-radius:50%;background:#5a4a66;display:block}
-.btn-start{
-  margin-top:52px;position:relative;overflow:hidden;cursor:pointer;
-  padding:17px 54px;border:1px solid rgba(212,175,55,.42);background:transparent;
-  color:#e8d9a8;font-size:13px;letter-spacing:.34em;font-family:inherit;
-  border-radius:2px;transition:.5s cubic-bezier(.4,0,.2,1);
-  animation:fadeUp .9s .6s both;
-}
-.btn-start::before{
+/* ============ 开始界面 ============ */
+#s-start{align-items:center;justify-content:center}
+.half{position:absolute;top:0;bottom:0;width:50%;overflow:hidden;z-index:1}
+.half-l{left:0;background:radial-gradient(ellipse at 78% 48%,#3d0d24 0%,#190818 42%,#06040a 100%)}
+.half-r{right:0;background:radial-gradient(ellipse at 22% 48%,#fffdf7 0%,#f4eee1 45%,#e5dbc4 100%)}
+.half-l::after{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(212,175,55,.22),transparent);
-  transform:translateX(-100%);transition:transform .7s;
+  background:radial-gradient(circle at 72% 28%,rgba(255,59,107,.20),transparent 58%),
+             radial-gradient(circle at 40% 80%,rgba(168,85,247,.16),transparent 62%);
 }
-.btn-start:hover::before{transform:translateX(100%)}
-.btn-start:hover{border-color:#d4af37;color:#fff;box-shadow:0 0 40px rgba(212,175,55,.22)}
-.btn-start:active{transform:scale(.97)}
-.intro-note{
-  margin-top:26px;font-size:10.5px;color:#5f5568;letter-spacing:.16em;
-  animation:fadeUp .9s .72s both;
+.half-r::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 26% 26%,rgba(255,255,255,.95),transparent 58%),
+             radial-gradient(circle at 60% 84%,rgba(200,161,58,.14),transparent 62%);
 }
-@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.half-art{position:absolute;bottom:4%;width:min(82%,330px);opacity:.92;pointer-events:none}
+.half-l .half-art{right:4%;animation:floatA 8s ease-in-out infinite}
+.half-r .half-art{left:4%;animation:floatB 8s ease-in-out infinite}
+@keyframes floatA{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-14px) rotate(1.5deg)}}
+@keyframes floatB{0%,100%{transform:translateY(0) rotate(1.5deg)}50%{transform:translateY(-14px) rotate(-1.5deg)}}
 
-/* ============ 答题 ============ */
-#quiz{padding:0}
-.quiz-header{padding:max(22px,env(safe-area-inset-top)) 26px 0;flex-shrink:0}
-.progress-track{
-  height:1px;background:rgba(255,255,255,.09);position:relative;overflow:visible;
-  transition:background .8s;
+.seam{
+  position:absolute;left:50%;top:0;bottom:0;width:1px;transform:translateX(-.5px);z-index:2;
+  background:linear-gradient(to bottom,transparent 0%,rgba(255,59,107,.75) 26%,rgba(255,255,255,.95) 50%,rgba(200,161,58,.75) 74%,transparent 100%);
+  box-shadow:0 0 26px rgba(255,255,255,.5);
+  animation:seamGlow 4s ease-in-out infinite;
 }
-body.light-mode .progress-track{background:rgba(0,0,0,.08)}
-.progress-fill{
-  position:absolute;left:0;top:0;height:1px;width:0;
-  background:linear-gradient(90deg,#7d2b4a,#c0392b,#e0607a);
-  transition:width .6s cubic-bezier(.4,0,.2,1),background .8s;
-  box-shadow:0 0 10px rgba(200,60,80,.9);
+@keyframes seamGlow{0%,100%{opacity:.7}50%{opacity:1}}
+
+.start-core{
+  position:relative;z-index:5;text-align:center;padding:0 26px;max-width:600px;
+  animation:coreIn 1.2s cubic-bezier(.16,1,.3,1);
 }
-body.light-mode .progress-fill{
-  background:linear-gradient(90deg,#d8c39a,#b08d5b,#8a6a3a);
-  box-shadow:0 0 10px rgba(176,141,91,.7);
+@keyframes coreIn{from{opacity:0;transform:translateY(26px) scale(.96);filter:blur(10px)}to{opacity:1;transform:none;filter:blur(0)}}
+
+.kicker{
+  font-size:11px;letter-spacing:.52em;text-indent:.52em;
+  color:rgba(255,255,255,.55);margin-bottom:20px;font-weight:500;
 }
+.title{
+  font-family:var(--serif);
+  font-size:clamp(30px,7.2vw,54px);
+  letter-spacing:.05em;line-height:1.16;font-weight:600;
+  background:linear-gradient(100deg,#ff3b6b 0%,#ff9ab5 24%,#ffffff 50%,#f5e6bd 76%,#c8a13a 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 6px 34px rgba(255,59,107,.34));
+}
+.title .x{font-size:.72em;opacity:.85;margin:0 .12em}
+.sub{
+  margin-top:18px;font-size:14.5px;line-height:1.9;
+  color:rgba(255,255,255,.62);letter-spacing:.06em;
+}
+.hint{margin-top:26px;font-size:11.5px;letter-spacing:.14em;color:rgba(255,255,255,.38)}
+
+.btn-start{
+  position:relative;margin-top:34px;padding:17px 58px;border:none;border-radius:999px;cursor:pointer;
+  font-family:var(--sans);font-size:16px;font-weight:600;letter-spacing:.22em;text-indent:.22em;color:#fff;
+  background:linear-gradient(100deg,#ff3b6b 0%,#a855f7 52%,#e0b84a 100%);
+  background-size:220% 100%;
+  box-shadow:0 12px 44px rgba(168,85,247,.45),inset 0 0 0 1px rgba(255,255,255,.18);
+  transition:transform .4s cubic-bezier(.16,1,.3,1),box-shadow .4s,background-position .6s;
+  animation:btnPulse 3s ease-in-out infinite;
+}
+@keyframes btnPulse{
+  0%,100%{box-shadow:0 12px 44px rgba(168,85,247,.42),inset 0 0 0 1px rgba(255,255,255,.18)}
+  50%{box-shadow:0 16px 60px rgba(255,59,107,.55),inset 0 0 0 1px rgba(255,255,255,.3)}
+}
+.btn-start:hover{background-position:100% 0;transform:translateY(-3px) scale(1.035)}
+.btn-start:active{transform:translateY(0) scale(.98)}
+.btn-start.small{padding:14px 42px;font-size:14px;margin-top:0;animation:none}
+
+/* ============ 答题界面 ============ */
+#s-quiz{flex-direction:column}
+.quiz-head{width:100%;max-width:720px;margin:0 auto;padding:34px 24px 0}
 .quiz-meta{
   display:flex;justify-content:space-between;align-items:center;
-  margin-top:16px;font-size:10px;letter-spacing:.24em;color:#6f6379;
-  transition:color .8s;
+  font-size:11.5px;letter-spacing:.2em;color:var(--dim);margin-bottom:14px;font-weight:500;
 }
-body.light-mode .quiz-meta{color:#9a8f80}
-.quiz-meta .chapter{display:flex;align-items:center;gap:8px}
-.quiz-meta .chapter b{font-weight:400;color:#c0392b;transition:color .8s}
-body.light-mode .quiz-meta .chapter b{color:#b08d5b}
-.quiz-body{
-  flex:1;display:flex;flex-direction:column;justify-content:center;
-  padding:20px 26px 60px;min-height:0;
+#phaseTag{transition:color .6s}
+.tag-sin{color:#ff5b7f}
+.tag-holy{color:#c8a13a}
+.progress{
+  position:relative;height:3px;border-radius:4px;
+  background:rgba(140,140,160,.16);overflow:hidden;
 }
-.q-wrap{width:100%;max-width:560px;margin:0 auto}
-.q-wrap.anim{animation:qIn .65s cubic-bezier(.2,.8,.2,1) both}
-@keyframes qIn{
-  0%{opacity:0;transform:translateY(34px) scale(.97);filter:blur(8px)}
-  100%{opacity:1;transform:none;filter:none}
+.progress-fill{
+  height:100%;width:0;border-radius:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  box-shadow:0 0 16px var(--accent);
+  transition:width .65s cubic-bezier(.16,1,.3,1),background .8s;
 }
-.q-index{
-  font-family:Georgia,serif;font-size:11px;letter-spacing:.3em;color:#7a4a5e;
-  margin-bottom:18px;transition:color .8s;
+.progress-fill::after{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+  animation:shine 2.4s linear infinite;
 }
-body.light-mode .q-index{color:#b08d5b}
-.q-text{
-  font-family:"Songti SC","Noto Serif SC",Georgia,serif;
-  font-size:clamp(20px,5.6vw,27px);line-height:1.72;font-weight:400;
-  letter-spacing:.02em;margin-bottom:36px;
-  text-shadow:0 0 40px rgba(0,0,0,.5);
+@keyframes shine{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+
+.quiz-body{flex:1;display:flex;align-items:center;justify-content:center;padding:30px 20px 60px}
+.card{
+  position:relative;width:100%;max-width:680px;
+  background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:26px;padding:38px 32px 32px;
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  box-shadow:var(--shadow);
+  transition:background .8s,border-color .8s,box-shadow .8s;
+  overflow:hidden;
 }
-body.light-mode .q-text{text-shadow:none}
-.options{display:flex;flex-direction:column;gap:11px}
+.card::before{
+  content:'';position:absolute;inset:0;border-radius:26px;padding:1px;pointer-events:none;
+  background:linear-gradient(145deg,var(--accent),transparent 42%,transparent 58%,var(--accent2));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  opacity:.5;transition:background .8s;
+}
+.card.anim-in{animation:cardIn .58s cubic-bezier(.16,1,.3,1)}
+@keyframes cardIn{
+  from{opacity:0;transform:translateY(28px) scale(.955);filter:blur(10px)}
+  to{opacity:1;transform:none;filter:blur(0)}
+}
+
+.card-num{
+  font-size:11px;letter-spacing:.34em;color:var(--accent);
+  font-weight:700;margin-bottom:16px;transition:color .8s;
+}
+.qtext{
+  font-family:var(--serif);
+  font-size:clamp(18px,4.6vw,23px);
+  line-height:1.62;font-weight:600;letter-spacing:.02em;
+  color:var(--text);transition:color .8s;
+}
+
+.options{display:flex;flex-direction:column;gap:11px;margin-top:26px}
 .opt{
-  position:relative;overflow:hidden;cursor:pointer;
-  padding:16px 20px 16px 22px;text-align:left;
-  font-family:inherit;font-size:clamp(13.5px,3.9vw,15px);line-height:1.6;
-  color:#cdc2d6;background:rgba(255,255,255,.028);
-  border:1px solid rgba(255,255,255,.07);
-  border-left:2px solid rgba(192,57,43,.35);
-  border-radius:2px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  transition:.45s cubic-bezier(.2,.8,.2,1);
-  opacity:0;animation:optIn .55s cubic-bezier(.2,.8,.2,1) forwards;
-  letter-spacing:.02em;
+  position:relative;display:block;width:100%;text-align:left;
+  padding:15px 20px 15px 56px;border-radius:15px;cursor:pointer;
+  background:transparent;border:1px solid var(--card-border);
+  color:var(--text);font-size:15px;line-height:1.55;font-family:var(--sans);
+  transition:border-color .3s,background .3s,transform .3s,color .8s;
+  overflow:hidden;
 }
-@keyframes optIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
-.opt::before{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(100deg,rgba(192,57,43,.3) 0%,rgba(140,40,120,.12) 45%,transparent 80%);
-  transform:translateX(-101%);transition:transform .6s cubic-bezier(.4,0,.2,1);
+.opt:hover{border-color:var(--accent);background:var(--accent-soft);transform:translateX(5px)}
+.opt:active{transform:translateX(5px) scale(.985)}
+.opt .letter{
+  position:absolute;left:17px;top:50%;transform:translateY(-50%);
+  width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11.5px;font-weight:700;
+  background:var(--accent-soft);color:var(--accent);
+  border:1px solid var(--card-border);
+  transition:background .3s,color .3s,border-color .3s;
 }
-.opt:hover::before,.opt:active::before{transform:translateX(0)}
-.opt:hover{
-  border-color:rgba(192,57,43,.55);border-left-color:#e0607a;
-  color:#fff;transform:translateX(6px);
-  box-shadow:-8px 0 32px -12px rgba(220,70,100,.6);
-}
-.opt .onum{
-  font-family:Georgia,serif;font-size:10px;letter-spacing:.2em;
-  color:#7d4a5e;margin-right:11px;transition:color .4s;
-}
-.opt:hover .onum{color:#e8a0b4}
-.opt.picked{
-  border-color:#e0607a;border-left-color:#e0607a;
-  background:rgba(224,96,122,.14);color:#fff;
-  box-shadow:0 0 40px -6px rgba(220,70,110,.55);
-  transform:translateX(6px);
-}
-body.light-mode .opt{
-  color:#3a332c;background:#ffffff;
-  border:1px solid rgba(0,0,0,.055);border-left:2px solid rgba(176,141,91,.32);
-  box-shadow:0 2px 16px rgba(140,115,80,.07);
-}
-body.light-mode .opt::before{
-  background:linear-gradient(100deg,rgba(214,185,140,.45) 0%,rgba(255,255,255,0) 75%);
-}
-body.light-mode .opt:hover{
-  border-color:rgba(176,141,91,.6);border-left-color:#b08d5b;color:#1d1813;
-  box-shadow:0 6px 28px rgba(150,120,80,.16);
-}
-body.light-mode .opt .onum{color:#c0b2a0}
-body.light-mode .opt:hover .onum{color:#b08d5b}
-body.light-mode .opt.picked{
-  border-color:#b08d5b;border-left-color:#b08d5b;
-  background:#fdf8ef;color:#1d1813;
-  box-shadow:0 8px 34px rgba(160,130,85,.24);transform:translateX(6px);
-}
+.opt:hover .letter{background:var(--accent);color:#fff;border-color:var(--accent)}
+.opt.selected{border-color:var(--accent);background:var(--accent-soft)}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent)}
+.opt.dim{opacity:.32;filter:blur(.4px)}
+
 .ripple{
-  position:absolute;border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle,rgba(255,255,255,.55),transparent 65%);
-  transform:translate(-50%,-50%) scale(0);animation:rip .65s ease-out forwards;
+  position:absolute;border-radius:50%;background:var(--accent);
+  opacity:.36;transform:scale(0);pointer-events:none;
+  animation:rip .62s ease-out forwards;
 }
-body.light-mode .ripple{background:radial-gradient(circle,rgba(200,170,120,.55),transparent 65%)}
-@keyframes rip{to{transform:translate(-50%,-50%) scale(1);opacity:0}}
+@keyframes rip{to{transform:scale(4.2);opacity:0}}
 
-/* ============ 闪光转场 ============ */
-.flash{
-  position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;
-  background:radial-gradient(circle at 50% 50%,#ffffff 0%,rgba(255,255,255,.92) 32%,rgba(255,245,230,0) 72%);
+/* ============ 加载界面 ============ */
+#s-loading{align-items:center;justify-content:center;flex-direction:column;background:#0a0810}
+.loader{position:relative;width:170px;height:170px;display:flex;align-items:center;justify-content:center}
+.ring{
+  position:absolute;inset:0;border-radius:50%;
+  border:1.5px solid transparent;
+  border-top-color:#ff3b6b;border-right-color:rgba(168,85,247,.6);
+  animation:spin 1.6s linear infinite;
 }
-.flash.burst{animation:burst 1.25s cubic-bezier(.4,0,.2,1) forwards}
-@keyframes burst{
-  0%{opacity:0;transform:scale(.15)}
-  22%{opacity:1;transform:scale(1.15)}
-  55%{opacity:.95;transform:scale(1.6)}
-  100%{opacity:0;transform:scale(2.6)}
+.ring.r2{inset:24px;border-top-color:#e0b84a;border-right-color:rgba(255,255,255,.35);animation-duration:2.4s;animation-direction:reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{
+  position:absolute;bottom:-58px;left:50%;transform:translateX(-50%);
+  white-space:nowrap;font-size:12.5px;letter-spacing:.34em;color:rgba(255,255,255,.5);
+  animation:blink 2s ease-in-out infinite;
 }
+@keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
 
-/* ============ 结果页 ============ */
-#result{padding:0 0 70px}
-.res-wrap{width:100%;max-width:620px;margin:0 auto;padding:0 24px}
-.res-head{
-  padding:max(54px,calc(env(safe-area-inset-top) + 34px)) 0 0;text-align:center;
-  animation:resUp .9s .05s both;
-}
-.res-kicker{
-  font-size:9.5px;letter-spacing:.44em;color:#b3a493;text-transform:uppercase;margin-bottom:16px;
-}
-.res-name{
-  font-family:"Songti SC","Noto Serif SC",Georgia,serif;
-  font-size:clamp(27px,8vw,40px);font-weight:400;letter-spacing:.14em;line-height:1.4;
-  color:#241f1a;
-}
-.res-name em{
-  font-style:normal;color:#b08d5b;position:relative;
-}
-.res-name .x{
-  display:inline-block;margin:0 12px;font-size:.62em;color:#cbbba4;
-  font-family:Georgia,serif;vertical-align:middle;
-}
-.res-latin{
-  margin-top:14px;font-family:Georgia,serif;font-size:10px;letter-spacing:.34em;color:#b9ab99;
-}
-@keyframes resUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+/* ============ 结果界面 ============ */
+#s-result{flex-direction:column;align-items:center}
+.result-wrap{width:100%;max-width:980px;margin:0 auto;padding:58px 22px 90px}
 
-.chara-stage{
-  display:grid;grid-template-columns:1fr 1fr;gap:10px;
-  margin-top:34px;position:relative;
+.res-head{text-align:center;margin-bottom:38px;animation:coreIn .9s cubic-bezier(.16,1,.3,1)}
+.res-kicker{font-size:10.5px;letter-spacing:.46em;text-indent:.46em;color:var(--dim)}
+.res-title{
+  font-family:var(--serif);font-size:clamp(26px,5.4vw,40px);
+  letter-spacing:.1em;margin:14px 0 14px;font-weight:600;
+  background:linear-gradient(100deg,#ff5b7f,#f3e3b8 50%,#d9b25c);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
 }
-.chara-card{
-  position:relative;border-radius:4px;overflow:hidden;
-  padding:16px 8px 14px;
-  background:linear-gradient(170deg,#171021 0%,#0d0814 100%);
-  border:1px solid rgba(255,255,255,.07);
-  box-shadow:0 24px 60px -30px rgba(90,40,120,.9);
-  animation:charaIn 1s cubic-bezier(.2,.8,.2,1) both;
+.res-balance{
+  font-size:13px;letter-spacing:.1em;color:var(--dim);line-height:2;max-width:640px;margin:0 auto;
 }
-.chara-card.angel{
-  background:linear-gradient(170deg,#ffffff 0%,#f7f1e6 100%);
-  border:1px solid rgba(176,141,91,.2);
-  box-shadow:0 24px 60px -30px rgba(170,140,95,.8);
-  animation-delay:.14s;
-}
-@keyframes charaIn{
-  0%{opacity:0;transform:translateY(30px) scale(.9);filter:blur(6px)}
-  100%{opacity:1;transform:none;filter:none}
-}
-.chara-card svg{width:100%;height:auto;display:block}
-.chara-card .c-label{
-  text-align:center;margin-top:8px;font-size:10px;letter-spacing:.3em;color:#8f7fa3;
-}
-.chara-card.angel .c-label{color:#b0a08c}
-.chara-card .c-latin{
-  text-align:center;font-family:Georgia,serif;font-size:8.5px;letter-spacing:.26em;
-  color:#5b4a70;margin-top:3px;
-}
-.chara-card.angel .c-latin{color:#c3b5a1}
-.chara-card::after{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.12),transparent 60%);
-}
+.res-balance b{color:#d9b25c;font-weight:600}
 
-.sec{margin-top:52px;animation:resUp .9s both}
-.sec-title{
-  display:flex;align-items:center;gap:14px;margin-bottom:22px;
-}
-.sec-title span{
-  font-size:10px;letter-spacing:.34em;color:#b08d5b;white-space:nowrap;
-}
-.sec-title i{flex:1;height:1px;background:linear-gradient(90deg,rgba(176,141,91,.4),transparent)}
-.tagline{
-  font-family:"Songti SC","Noto Serif SC",Georgia,serif;
-  font-size:clamp(17px,4.9vw,21px);line-height:1.85;color:#3a322a;
-  letter-spacing:.03em;padding-left:18px;border-left:2px solid #d8c39a;
-  margin-bottom:26px;
-}
-.body-text{
-  font-size:14px;line-height:2.15;color:#5c534a;letter-spacing:.02em;
-  margin-bottom:18px;text-align:justify;
-}
-.body-text:last-child{margin-bottom:0}
-.kw{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 4px}
-.kw span{
-  font-size:10.5px;letter-spacing:.14em;padding:6px 13px;border-radius:100px;
-  background:rgba(176,141,91,.1);color:#a08050;border:1px solid rgba(176,141,91,.22);
-}
-.quote-box{
-  margin-top:26px;padding:22px 22px 22px 26px;border-radius:3px;
-  background:linear-gradient(100deg,#fbf7f0,#f5eee2);
-  border-left:2px solid #d8c39a;position:relative;
-}
-.quote-box p{
-  font-family:"Songti SC","Noto Serif SC",Georgia,serif;
-  font-size:14.5px;line-height:1.95;color:#6b5f52;letter-spacing:.03em;
-}
-.quote-box b{display:block;font-size:10px;letter-spacing:.3em;color:#b08d5b;font-weight:400;margin-bottom:10px}
+.res-panels{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:22px}
+@media(max-width:780px){.res-panels{grid-template-columns:1fr}}
 
-/* 分布图 */
+.panel{
+  position:relative;border-radius:26px;padding:26px 24px 30px;
+  border:1px solid var(--card-border);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  overflow:hidden;
+  animation:panelIn .9s cubic-bezier(.16,1,.3,1) both;
+}
+.panel-demon{
+  background:linear-gradient(168deg,rgba(130,22,58,.30),rgba(22,10,32,.55));
+  border-color:rgba(255,90,120,.26);
+  box-shadow:0 30px 90px rgba(255,45,85,.14) inset,0 20px 60px rgba(0,0,0,.4);
+  animation-delay:.1s;
+}
+.panel-angel{
+  background:linear-gradient(168deg,rgba(240,214,150,.18),rgba(255,255,255,.05));
+  border-color:rgba(230,200,130,.3);
+  box-shadow:0 30px 90px rgba(240,210,140,.12) inset,0 20px 60px rgba(0,0,0,.4);
+  animation-delay:.24s;
+}
+@keyframes panelIn{from{opacity:0;transform:translateY(34px) scale(.96)}to{opacity:1;transform:none}}
+
+.art-wrap{
+  display:flex;justify-content:center;align-items:center;
+  margin-bottom:6px;
+}
+.art-wrap svg{width:min(100%,230px);height:auto;display:block;filter:drop-shadow(0 10px 40px rgba(0,0,0,.5))}
+.panel-demon .art-wrap svg{animation:floatA 7s ease-in-out infinite}
+.panel-angel .art-wrap svg{animation:floatB 7s ease-in-out infinite}
+
+.badge{
+  display:inline-block;font-size:10px;letter-spacing:.3em;text-indent:.3em;
+  padding:6px 13px;border-radius:999px;margin-bottom:14px;font-weight:600;
+}
+.panel-demon .badge{background:rgba(255,59,107,.16);color:#ff8fa8;border:1px solid rgba(255,59,107,.34)}
+.panel-angel .badge{background:rgba(217,178,92,.16);color:#e8c976;border:1px solid rgba(217,178,92,.4)}
+
+.p-name{
+  font-family:var(--serif);font-size:29px;letter-spacing:.16em;
+  font-weight:600;line-height:1.2;
+}
+.panel-demon .p-name{color:#ffdce4}
+.panel-angel .p-name{color:#fdf3d8}
+.p-sub{font-size:11px;letter-spacing:.24em;color:var(--dim);margin-top:9px;margin-bottom:18px}
+.p-desc{font-size:13.8px;line-height:2;color:rgba(240,236,247,.78);letter-spacing:.02em}
+.panel-angel .p-desc{color:rgba(245,240,230,.8)}
+.p-quote{
+  margin-top:20px;padding:15px 16px;border-radius:14px;
+  font-family:var(--serif);font-size:13.5px;line-height:1.85;letter-spacing:.05em;
+}
+.panel-demon .p-quote{background:rgba(255,59,107,.09);border-left:2px solid rgba(255,59,107,.6);color:#ffb9c8}
+.panel-angel .p-quote{background:rgba(217,178,92,.1);border-left:2px solid rgba(217,178,92,.7);color:#efdca8}
+
+/* 圆形分布图 */
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:22px}
+@media(max-width:780px){.charts{grid-template-columns:1fr}}
 .chart-box{
-  margin-top:26px;padding:26px 10px 18px;border-radius:4px;
-  background:linear-gradient(180deg,#fffdfa,#f7f1e7);
-  border:1px solid rgba(176,141,91,.16);
-  box-shadow:0 20px 60px -40px rgba(160,130,90,.8);
+  border-radius:26px;padding:24px 22px 26px;
+  border:1px solid var(--card-border);background:var(--card-bg);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  display:flex;flex-direction:column;align-items:center;
+  animation:panelIn .9s cubic-bezier(.16,1,.3,1) both;animation-delay:.34s;
 }
-.chart-box svg{width:100%;height:auto;max-width:400px;margin:0 auto;display:block}
-.chart-legend{
-  display:flex;justify-content:center;gap:26px;margin-top:14px;
-  font-size:10px;letter-spacing:.2em;color:#a8998a;
+.chart-title{
+  display:flex;align-items:center;gap:9px;align-self:flex-start;
+  font-size:12px;letter-spacing:.24em;color:var(--dim);margin-bottom:16px;font-weight:600;
 }
-.chart-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.chart-title .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.dot.d1{background:#ff3b6b;box-shadow:0 0 12px #ff3b6b}
+.dot.d2{background:#d9b25c;box-shadow:0 0 12px #d9b25c}
 
-/* 百分比 */
-.bars{display:flex;flex-direction:column;gap:14px;margin-top:24px}
-.bar-row{display:grid;grid-template-columns:64px 1fr 42px;align-items:center;gap:12px}
-.bar-name{font-size:12px;letter-spacing:.14em;color:#5c534a;text-align:right}
-.bar-track{height:3px;border-radius:2px;background:rgba(0,0,0,.055);overflow:hidden}
-.bar-fill{height:100%;width:0;border-radius:2px;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
-.bar-val{font-family:Georgia,serif;font-size:11px;color:#a8998a;text-align:right}
+.donut{position:relative;width:230px;height:230px}
+.donut svg{width:100%;height:100%;animation:donutIn 1.1s cubic-bezier(.16,1,.3,1) both .45s}
+@keyframes donutIn{from{opacity:0;transform:scale(.82) rotate(-12deg)}to{opacity:1;transform:none}}
+.donut-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;pointer-events:none;
+}
+.donut-center .dc-label{font-size:9.5px;letter-spacing:.3em;color:var(--dim);margin-bottom:7px}
+.donut-center .dc-val{font-family:var(--serif);font-size:21px;letter-spacing:.1em;font-weight:600}
+.donut-center .dc-pct{font-size:11px;color:var(--dim);margin-top:5px;letter-spacing:.1em}
 
-.combo-box{
-  margin-top:26px;padding:26px 24px;border-radius:4px;
-  background:linear-gradient(150deg,#1b1424 0%,#120c1a 55%,#1a1220 100%);
-  color:#d8cddf;position:relative;overflow:hidden;
-  box-shadow:0 30px 70px -40px rgba(90,50,130,.9);
-}
-.combo-box::before{
-  content:'';position:absolute;top:-40%;left:-20%;width:80%;height:180%;
-  background:radial-gradient(circle,rgba(176,141,91,.18),transparent 65%);
-  pointer-events:none;
-}
-.combo-box b{
-  display:block;font-size:10px;letter-spacing:.34em;color:#c8a86a;
-  font-weight:400;margin-bottom:16px;
-}
-.combo-box p{
-  font-family:"Songti SC","Noto Serif SC",Georgia,serif;
-  font-size:14.5px;line-height:2.1;letter-spacing:.03em;color:#cfc3d8;
-  position:relative;
-}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:9px 16px;width:100%;margin-top:20px}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--dim)}
+.legend-item i{width:8px;height:8px;border-radius:2px;flex:0 0 auto}
+.legend-item b{margin-left:auto;color:var(--text);font-weight:600;font-size:11.5px}
 
-.res-actions{display:flex;gap:12px;margin-top:46px}
-.btn-ghost{
-  flex:1;padding:15px;cursor:pointer;font-family:inherit;
-  font-size:11.5px;letter-spacing:.28em;border-radius:2px;
-  background:transparent;border:1px solid rgba(176,141,91,.42);color:#a08050;
-  transition:.4s;
+.res-footer{display:flex;justify-content:center;margin-top:44px}
+.res-footer .btn-start{
+  background:linear-gradient(100deg,#d9b25c,#ff5b7f);
+  background-size:200% 100%;
+  box-shadow:0 12px 40px rgba(217,178,92,.32);
 }
-.btn-ghost:hover{background:rgba(176,141,91,.09);border-color:#b08d5b;color:#8a6a3a}
-.btn-ghost:active{transform:scale(.98)}
-.res-foot{
-  text-align:center;margin-top:36px;font-size:9.5px;letter-spacing:.26em;color:#c3b6a6;
-}
-.fade-seq{animation:resUp .9s both}
 </style>
 </head>
-<body>
-<canvas id="bgCanvas"></canvas>
-<div class="noise-layer"></div>
+<body class="theme-sin">
 
-<!-- ========== 封面 ========== -->
-<section id="intro" class="screen show">
-  <div class="intro-halo"></div>
-  <div class="intro-kicker">Soul Archetype Test</div>
-  <h1 class="intro-title">
-    <span class="l1">七宗罪</span>
-    <span class="amp">×</span>
-    <span class="l2">七美德</span>
-  </h1>
-  <p class="intro-sub">30 道题，照见你灵魂里的暗与光</p>
-  <div class="intro-meta">
-    <span>30 QUESTIONS</span><i></i><span>约 4 分钟</span><i></i><span>7 SINS · 7 VIRTUES</span>
-  </div>
-  <button class="btn-start" id="btnStart">开 始 测 试</button>
-  <p class="intro-note">请凭第一直觉作答，不要思考太久</p>
-</section>
+<canvas id="fx"></canvas>
 
-<!-- ========== 答题 ========== -->
-<section id="quiz" class="screen">
-  <header class="quiz-header">
-    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="quiz-meta">
-      <span class="chapter" id="chapterLabel">I <b>·</b> 暗面之章</span>
-      <span id="qCounter">01 / 30</span>
+<div id="app">
+
+  <!-- ========== 开始界面 ========== -->
+  <section class="screen active" id="s-start">
+    <div class="half half-l"><div class="half-art" id="startDemon"></div></div>
+    <div class="half half-r"><div class="half-art" id="startAngel"></div></div>
+    <div class="seam"></div>
+    <div class="start-core">
+      <div class="kicker">SOUL BALANCE TEST</div>
+      <h1 class="title">七宗罪<span class="x">×</span>七美德</h1>
+      <p class="sub">你的灵魂里，藏着一头不肯低头的恶魔<br>也住着一位尚未苏醒的天使</p>
+      <button class="btn-start" id="btnStart">开始测试</button>
+      <p class="hint">30 道题 · 约 5 分钟 · 请凭第一直觉作答</p>
     </div>
-  </header>
-  <div class="quiz-body">
-    <div class="q-wrap" id="qWrap">
-      <div class="q-index" id="qIndex">QUESTION 01</div>
-      <h2 class="q-text" id="qText"></h2>
-      <div class="options" id="options"></div>
+  </section>
+
+  <!-- ========== 答题界面 ========== -->
+  <section class="screen" id="s-quiz">
+    <div class="quiz-head">
+      <div class="quiz-meta">
+        <span id="phaseTag" class="tag-sin">暗面 · 七宗罪</span>
+        <span id="qIndex">01 / 30</span>
+      </div>
+      <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
     </div>
-  </div>
-</section>
-
-<!-- ========== 结果 ========== -->
-<section id="result" class="screen">
-  <div class="res-wrap">
-    <div class="res-head">
-      <div class="res-kicker">Your Soul Map</div>
-      <h1 class="res-name" id="resName"></h1>
-      <div class="res-latin" id="resLatin"></div>
+    <div class="quiz-body">
+      <div class="card" id="card">
+        <div class="card-num" id="cardNum">Q.01</div>
+        <h2 class="qtext" id="qText"></h2>
+        <div class="options" id="options"></div>
+      </div>
     </div>
+  </section>
 
-    <div class="chara-stage" id="charaStage"></div>
-
-    <div class="sec" id="secSin">
-      <div class="sec-title"><span>暗 · 你的罪之主</span><i></i></div>
-      <div class="tagline" id="sinTagline"></div>
-      <div id="sinBody"></div>
-      <div class="kw" id="sinKw"></div>
-      <div class="quote-box"><b>SHADOW</b><p id="sinShadow"></p></div>
-      <div class="quote-box" style="border-left-color:#c9a0e0;background:linear-gradient(100deg,#faf6ff,#f3edfa)"><b>LIGHT</b><p id="sinLight"></p></div>
+  <!-- ========== 加载界面 ========== -->
+  <section class="screen" id="s-loading">
+    <div class="loader">
+      <div class="ring"></div>
+      <div class="ring r2"></div>
+      <div class="loader-text">正在称量你的灵魂…</div>
     </div>
+  </section>
 
-    <div class="sec" id="secVirtue">
-      <div class="sec-title"><span>光 · 你的美德之主</span><i></i></div>
-      <div class="tagline" id="virTagline"></div>
-      <div id="virBody"></div>
-      <div class="kw" id="virKw"></div>
-      <div class="quote-box"><b>LIGHT</b><p id="virLight"></p></div>
-    </div>
+  <!-- ========== 结果界面 ========== -->
+  <section class="screen" id="s-result">
+    <div class="result-wrap">
+      <div class="res-head">
+        <div class="res-kicker">YOUR SOUL REPORT</div>
+        <h2 class="res-title">灵 魂 天 平 报 告</h2>
+        <div class="res-balance" id="balanceText"></div>
+      </div>
 
-    <div class="sec">
-      <div class="sec-title"><span>你的灵魂分布图</span><i></i></div>
-      <div class="chart-box">
-        <svg id="radialChart" viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg"></svg>
-        <div class="chart-legend">
-          <span><i style="background:#8d2f52"></i>七宗罪</span>
-          <span><i style="background:#c9a86a"></i>七美德</span>
+      <div class="res-panels">
+        <div class="panel panel-demon" id="panelDemon"></div>
+        <div class="panel panel-angel" id="panelAngel"></div>
+      </div>
+
+      <div class="charts">
+        <div class="chart-box">
+          <div class="chart-title"><span class="dot d1"></span>罪 · 分布图</div>
+          <div class="donut" id="donutSin"></div>
+          <div class="legend" id="legendSin"></div>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title"><span class="dot d2"></span>美德 · 分布图</div>
+          <div class="donut" id="donutHoly"></div>
+          <div class="legend" id="legendHoly"></div>
         </div>
       </div>
-    </div>
 
-    <div class="sec">
-      <div class="sec-title"><span>维度详情</span><i></i></div>
-      <div class="bars" id="barsSin"></div>
-      <div class="bars" id="barsVir" style="margin-top:22px"></div>
-    </div>
-
-    <div class="sec">
-      <div class="sec-title"><span>双生解读</span><i></i></div>
-      <div class="combo-box">
-        <b>DUAL INTERPRETATION</b>
-        <p id="comboText"></p>
+      <div class="res-footer">
+        <button class="btn-start small" id="btnRestart">重 新 测 试</button>
       </div>
     </div>
+  </section>
 
-    <div class="res-actions">
-      <button class="btn-ghost" id="btnRestart">再 测 一 次</button>
-    </div>
-    <div class="res-foot">SAVE YOUR SOUL MAP</div>
-  </div>
-</section>
-
-<div class="flash" id="flash"></div>
+</div>
 
 <script>
-/* =====================================================================
-   数据层
-   ===================================================================== */
-const SIN_KEYS = ['pride','envy','wrath','sloth','greed','gluttony','lust'];
-const VIR_KEYS = ['humility','kindness','patience','diligence','charity','temperance','chastity'];
-const PAIR = {pride:'humility',envy:'kindness',wrath:'patience',sloth:'diligence',greed:'charity',gluttony:'temperance',lust:'chastity'};
+(function(){
+'use strict';
 
-const SIN_DATA = {
+/* =========================================================
+   一、数据层
+   ========================================================= */
+
+var SIN_KEYS = ['pride','envy','wrath','sloth','greed','gluttony','lust'];
+var HOLY_KEYS = ['humility','kindness','patience','diligence','charity','temperance','purity'];
+
+/* ---------- 七宗罪 ---------- */
+var SIN_META = {
   pride:{
-    zh:'傲慢',latin:'SUPERBIA',en:'PRIDE',
-    color:'#7c3aad',color2:'#c99cf0',hair1:'#4a2168',hair2:'#2a104
+    name:'傲慢', en:'PRIDE', being:'路西法', color:'#a855f7',
+    desc:'你的灵魂深处烧着一团不肯低头的火。你相信自己的判断高于一切，即使独处时也在审视自己是否足够耀眼。这份骄傲让你远离平庸，也让你远离他人——因为在你眼里，世界是一面镜子，而你只在意镜中的自己。',
+    quote:'低头不是认输，是为了看清脚下的路。'
+  },
+  envy:{
+    name:'嫉妒', en:'ENVY', being:'利维坦', color:'#22c55e',
+    desc:'你有一双过于敏锐的眼睛，总能在人群里第一眼看见"凭什么是他"。你并不想真的毁掉谁，你只是无法忍受自己不在那个位置上。你的嫉妒像海水——安静、深沉、一寸一寸地淹没你自己。',
+    quote:'真正属于你的，从不需要从别人手里抢。'
+  },
+  wrath:{
+    name:'暴怒', en:'WRATH', being:'萨麦尔', color:'#ef4444',
+    desc:'你的情绪像一座从不休眠的火山。你讨厌被冒犯，讨厌被轻视，讨厌那些理所当然的越界。你的愤怒常常比你本人更早到达现场。事后你也会后悔，但下一次，它依然准时赴约。',
+    quote:'愤怒是火，它可以照亮，也可以烧毁。'
+  },
+  sloth:{
+    name:'懒惰', en:'SLOTH', being:'贝尔芬格', color:'#38bdf8',
+    desc:'你不是没有能力，你只是把"以后"当成了永远。你有过很多计划，它们大多停在第一行。你用"顺其自然"包装逃避，用"还没准备好"推迟每一次开始——而时间，从来不等人准备好。',
+    quote:'你浪费的今天，是别人奢望过的明天。'
+  },
+  greed:{
+    name:'贪婪', en:'GREED', being:'玛门', color:'#eab308',
+    desc:'你的手总是伸向更多——更多的钱、更多的选择、更多的安全感。你不坏，你只是害怕"不够"。这种恐惧让你精于计算，也让你很难真正放松地拥有任何东西，因为你永远在担心失去。',
+    quote:'你抓住的东西，也在抓住你。'
+  },
+  gluttony:{
+    name:'暴食', en:'GLUTTONY', being:'别西卜', color:'#f97316',
+    desc:'你用填充来对抗空虚。食物、短视频、无止境的消费——你填满的从来不是胃，而是那个说不清在哪里的空洞。满足的瞬间很短，之后是更长的空。你其实知道，只是不愿停下来。',
+    quote:'真正的饥饿，从来不在胃里。'
+  },
+  lust:{
+    name:'色欲', en:'LUST', being:'阿斯蒙蒂斯', color:'#ec4899',
+    desc:'你对"心动"上瘾。被注视、被渴望、被需要的感觉，比任何东西都让你觉得活着。你享受暧昧的张力，却在承诺面前犹疑——因为你怕的不是束缚，而是"一旦确定，就再也没有下一次心动了"。',
+    quote:'欲望不需要理由，但爱需要。'
+  }
+};
+
+/* ---------- 七美德 ---------- */
+var HOLY_META = {
+  humility:{
+    name:'谦逊', en:'HUMILITY', being:'加百列', color:'#93b4ff',
+    desc:'你不必站在聚光灯下才能确认自己的价值。你清楚自己做了什么，也清楚自己还差什么。你的低调不是退缩，而是一种从容——你知道光不会因为你闭上眼睛就消失，所以你不急着证明。',
+    quote:'饱满的麦穗，总是低着头的。'
+  },
+  kindness:{
+    name:'仁慈', en:'KINDNESS', being:'拉斐尔', color:'#ff9fb3',
+    desc:'你有一种稀缺的能力——在别人最狼狈的时候，依然把他当人看。你的善意不带表演性，因为你见过脆弱的样子，并且愿意承认那是人之常情。你让这个世界少了一点冷。',
+    quote:'温柔不是软弱，是见过黑暗之后的选择。'
+  },
+  patience:{
+    name:'宽容', en:'PATIENCE', being:'乌列尔', color:'#b39dff',
+    desc:'你记得伤害，但你选择不让它定义你。你懂得有些账算不清，有些人不必再等一句道歉。你的宽容不是遗忘，也不是原谅了谁——你只是把自由，还给了自己。',
+    quote:'放下不是放过别人，是放过自己。'
+  },
+  diligence:{
+    name:'勤勉', en:'DILIGENCE', being:'米迦勒', color:'#ffcf5c',
+    desc:'你是那种把"想做的事"变成"做完的事"的人。你不依赖灵感，你依赖节奏。你的努力不喧哗，甚至有点笨拙，但一年之后回头看，所有人都会看见结果——只有你自己知道那有多难。',
+    quote:'所有闪闪发光，都是熬出来的。'
+  },
+  charity:{
+    name:'慷慨', en:'CHARITY', being:'沙利叶', color:'#ffc978',
+    desc:'你有一种富足感，不是因为你拥有很多，而是因为你相信"够用"。你愿意分享资源、时间、情绪价值，而且从不记账。你懂得，人间的暖流就是这样一圈一圈循环起来的。',
+    quote:'给予的人，从不真正贫穷。'
+  },
+  temperance:{
+    name:'节制', en:'TEMPERANCE', being:'拉贵尔', color:'#7fd8cc',
+    desc:'你能和自己的欲望坐下来谈判。你知道什么该要、什么该停、什么该转身走开。你的自律不是为了苦行，而是为了把人生的掌控权牢牢留在自己手里——这比任何放纵都更爽。',
+    quote:'能管住自己的人，才是自由的。'
+  },
+  purity:{
+    name:'纯洁', en:'PURITY', being:'约菲尔', color:'#8ecdff',
+    desc:'你身上有一种干净的质地。不是因为你不懂那些灰色，而是因为你见过之后，依然选择站在光里。你的专一不是限制，而是你亲手为自己划下的底线——那条线，你守得很好。',
+    quote:'干净，是最难的一种坚持。'
+  }
+};
+
+/* ---------- 配色（恶魔 / 天使） ---------- */
+var SIN_ART = {
+  pride:   {body:'#3a2352',bodyDark:'#1a0f2e',horn:'#e0b84a',hornDark:'#8a6d16',wing:'#6b2d6e',wing2:'#2a0f33',eye:'#ffd166',hair:'#1e1130',glow:'#8b5cf6'},
+  envy:    {body:'#1d3b2a',bodyDark:'#0d1f16',horn:'#7fe08a',hornDark:'#3f7a48',wing:'#2f6b3e',wing2:'#0f2a17',eye:'#a8ff9e',hair:'#10241a',glow:'#22c55e'},
+  wrath:   {body:'#4a1420',bodyDark:'#1e0710',horn:'#ff8a4c',hornDark:'#a13a1c',wing:'#8b1c2e',wing2:'#2a0810',eye:'#ff5b3b',hair:'#2a0a12',glow:'#ef4444'},
+  sloth:   {body:'#26323f',bodyDark:'#0e161f',horn:'#8fa8c4',hornDark:'#4b5f75',wing:'#33485e',wing2:'#0f1a25',eye:'#7fd3ff',hair:'#16232f',glow:'#38bdf8'},
+  greed:   {body:'#3a2f10',bodyDark:'#191206',horn:'#ffd93d',hornDark:'#9a7a12',wing:'#5c4a12',wing2:'#221a05',eye:'#ffe066',hair:'#241c07',glow:'#eab308'},
+  gluttony:{body:'#3b2414',bodyDark:'#180d06',horn:'#ffa04d',hornDark:'#9c5a1e',wing:'#6b3a1a',wing2:'#25130a',eye:'#ffb86b',hair:'#241407',glow:'#f97316'},
+  lust:    {body:'#42152e',bodyDark:'#1c0714',horn:'#ff6fae',hornDark:'#a33a6d',wing:'#8b1f52',wing2:'#2c0a1c',eye:'#ff9ecb',hair:'#2a0b1c',glow:'#ec4899'}
+};
+
+var HOLY_ART = {
+  humility:  {body:'#f4f7ff',bodyDark:'#d7e0f5',halo:'#a8c8ff',wing:'#eef3ff',wing2:'#cdd9f2',eye:'#7f9de0',hair:'#e8eefc',glow:'#93b4ff'},
+  kindness:  {body:'#fff6f8',bodyDark:'#f2d8de',halo:'#ffb8c6',wing:'#fff0f3',wing2:'#f0d3da',eye:'#e08a9c',hair:'#f7e4e8',glow:'#ff9fb3'},
+  patience:  {body:'#f7f4ff',bodyDark:'#ddd5f
