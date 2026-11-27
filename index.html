@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#07060b">
+<title>七宗罪 · 人格暗面测试</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#07060b}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;
+  color:#ece9f2;-webkit-font-smoothing:antialiased;overscroll-behavior:none;
+}
+:root{
+  --accent:#a78bfa;
+  --accent-soft:rgba(167,139,250,.35);
+}
+
+/* ============ 背景层 ============ */
+#bgCanvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;opacity:.9}
+.noise{
+  position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grain 8s steps(6) infinite;
+}
+@keyframes grain{
+  0%,100%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}
+  60%{transform:translate(-2%,-2%)}80%{transform:translate(3%,1%)}
+}
+.vignette{
+  position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 40%,transparent 30%,rgba(0,0,0,.55) 80%,rgba(0,0,0,.9) 100%);
+}
+.aurora{
+  position:fixed;inset:-20%;z-index:0;pointer-events:none;filter:blur(90px);opacity:.55;
+}
+.aurora span{position:absolute;border-radius:50%;display:block}
+.a1{width:60vw;height:60vw;left:-20vw;top:-10vh;background:radial-gradient(circle,#5b21b6,transparent 65%);animation:float1 18s ease-in-out infinite}
+.a2{width:55vw;height:55vw;right:-18vw;top:25vh;background:radial-gradient(circle,#831843,transparent 65%);animation:float2 22s ease-in-out infinite}
+.a3{width:50vw;height:50vw;left:10vw;bottom:-15vh;background:radial-gradient(circle,#1e3a8a,transparent 65%);animation:float3 26s ease-in-out infinite}
+@keyframes float1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(6vw,8vh) scale(1.15)}}
+@keyframes float2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-8vw,-6vh) scale(1.1)}}
+@keyframes float3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(5vw,-10vh) scale(1.2)}}
+
+/* ============ 页面通用 ============ */
+.screen{
+  position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;
+  opacity:0;pointer-events:none;transform:scale(1.03) translateZ(0);
+  transition:opacity .65s cubic-bezier(.2,.8,.2,1),transform .65s cubic-bezier(.2,.8,.2,1);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
+}
+.screen.active{opacity:1;pointer-events:auto;transform:scale(1)}
+
+/* ============ 开始页 ============ */
+#start{align-items:center;justify-content:center;padding:40px 28px}
+.start-inner{display:flex;flex-direction:column;align-items:center;text-align:center;width:100%;max-width:460px}
+.rune{
+  font-size:26px;color:var(--accent);letter-spacing:.6em;text-indent:.6em;
+  opacity:.85;margin-bottom:26px;
+  text-shadow:0 0 24px var(--accent);animation:pulse 3.6s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:.4;transform:scale(.94)}50%{opacity:1;transform:scale(1.05)}}
+.title-main{
+  font-size:clamp(54px,16vw,88px);font-weight:200;letter-spacing:.24em;text-indent:.24em;
+  line-height:1.1;
+  background:linear-gradient(180deg,#ffffff 0%,#d8ccff 40%,#7c5cff 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 40px rgba(140,100,255,.45));
+}
+.title-en{
+  margin-top:16px;font-size:11px;letter-spacing:.55em;text-indent:.55em;
+  color:rgba(200,190,230,.5);font-weight:400;
+}
+.divider{
+  width:60px;height:1px;margin:34px 0;
+  background:linear-gradient(90deg,transparent,rgba(167,139,250,.9),transparent);
+  box-shadow:0 0 14px rgba(167,139,250,.7);
+}
+.desc{
+  font-size:15px;line-height:2.1;color:rgba(210,205,225,.62);letter-spacing:.08em;font-weight:300;
+}
+.btn{
+  position:relative;overflow:hidden;border:none;cursor:pointer;font-family:inherit;
+  padding:17px 56px;border-radius:999px;
+  font-size:14px;letter-spacing:.42em;text-indent:.42em;font-weight:400;
+  color:#e9e2ff;background:rgba(140,110,255,.1);
+  border:1px solid rgba(180,155,255,.45);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  transition:.35s cubic-bezier(.2,.8,.2,1);
+  box-shadow:0 0 30px rgba(120,90,255,.18),inset 0 0 20px rgba(140,110,255,.08);
+}
+.btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.28) 50%,transparent 65%);
+  transform:translateX(-130%);animation:shine 3.6s infinite;
+}
+@keyframes shine{0%,55%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
+.btn:active{transform:scale(.96);box-shadow:0 0 44px rgba(120,90,255,.4)}
+.btn-start{margin-top:52px}
+.hint{margin-top:26px;font-size:11px;letter-spacing:.24em;color:rgba(180,172,205,.35)}
+
+/* ============ 答题页 ============ */
+#quiz{padding:0 24px 40px}
+.quiz-head{padding:26px 4px 0;flex-shrink:0}
+.progress-track{height:2px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.progress-fill{
+  height:100%;width:0;border-radius:2px;
+  background:linear-gradient(90deg,#7c3aed,var(--accent),#ff4d8d);
+  box-shadow:0 0 14px var(--accent);
+  transition:width .55s cubic-bezier(.2,.8,.2,1);
+}
+.counter{
+  margin-top:12px;text-align:right;font-size:11px;letter-spacing:.24em;
+  color:rgba(180,172,205,.45);
+}
+.counter b{color:var(--accent);font-weight:500}
+.quiz-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:28px 0 0;max-width:520px;width:100%;margin:0 auto}
+.q-num{
+  font-size:11px;letter-spacing:.42em;color:var(--accent);opacity:.7;margin-bottom:18px;
+  font-weight:400;
+}
+.q-text{
+  font-size:21px;line-height:1.65;font-weight:300;letter-spacing:.04em;
+  color:#f2eff8;margin-bottom:34px;
+  text-shadow:0 0 30px rgba(167,139,250,.25);
+}
+.options{display:flex;flex-direction:column;gap:12px}
+.option{
+  position:relative;overflow:hidden;
+  width:100%;text-align:left;cursor:pointer;font-family:inherit;
+  padding:17px 20px 17px 24px;border-radius:14px;
+  border:1px solid rgba(255,255,255,.075);
+  background:linear-gradient(135deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
+  color:rgba(220,215,232,.86);font-size:14.5px;line-height:1.65;letter-spacing:.02em;
+  transition:.32s cubic-bezier(.2,.8,.2,1);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+.option::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,transparent,var(--accent),transparent);
+  opacity:0;transition:.32s;
+}
+.option::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(167,139,250,.16),transparent 60%);
+  opacity:0;transition:.32s;
+}
+.option:active{transform:scale(.975)}
+.option:hover{
+  border-color:rgba(167,139,250,.45);color:#fff;
+  box-shadow:0 0 26px rgba(120,90,255,.16),inset 0 0 22px rgba(140,110,255,.06);
+}
+.option:hover::before,.option:hover::after{opacity:1}
+.option.picked{
+  border-color:var(--accent);
+  background:linear-gradient(135deg,rgba(167,139,250,.22),rgba(167,139,250,.06));
+  box-shadow:0 0 34px var(--accent-soft),inset 0 0 24px rgba(167,139,250,.12);
+  color:#fff;
+}
+.option.picked::before{opacity:1}
+.option.dim{opacity:.22;transform:scale(.97)}
+
+.quiz-body.out{animation:qOut .34s cubic-bezier(.4,0,1,1) forwards}
+@keyframes qOut{to{opacity:0;transform:translateX(-24px) scale(.97);filter:blur(6px)}}
+.quiz-body.in{animation:qIn .48s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes qIn{from{opacity:0;transform:translateX(26px) scale(.98);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+
+/* ============ 计算动画 ============ */
+#calc{
+  position:fixed;inset:0;z-index:60;background:#07060b;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .5s;
+}
+#calc.on{opacity:1;pointer-events:auto}
+.calc-ring{
+  width:88px;height:88px;border-radius:50%;position:relative;margin-bottom:36px;
+}
+.calc-ring::before,.calc-ring::after{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  border:1px solid transparent;
+}
+.calc-ring::before{
+  border-top-color:var(--accent);border-right-color:rgba(167,139,250,.3);
+  animation:spin 1.1s linear infinite;
+  box-shadow:0 0 26px rgba(167,139,250,.5);
+}
+.calc-ring::after{
+  inset:16px;border-bottom-color:#ff4d8d;border-left-color:rgba(255,77,141,.25);
+  animation:spin 1.6s linear infinite reverse;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.calc-text{font-size:13px;letter-spacing:.4em;text-indent:.4em;color:rgba(210,200,235,.7)}
+.calc-bar{width:180px;height:1px;background:rgba(255,255,255,.1);margin-top:26px;overflow:hidden;border-radius:1px}
+.calc-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7c3aed,#ff4d8d);box-shadow:0 0 12px var(--accent)}
+
+/* ============ 结果页 ============ */
+#result{padding:44px 24px 70px;align-items:center}
+.result-inner{width:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;align-items:center}
+.demon-stage{
+  width:min(66vw,270px);aspect-ratio:1/1;position:relative;
+  animation:demonIn 1.1s cubic-bezier(.2,.8,.2,1) both;
+  filter:drop-shadow(0 0 46px var(--accent-soft));
+}
+.demon-stage svg{width:100%;height:100%;display:block;animation:bob 4.6s ease-in-out infinite}
+@keyframes demonIn{0%{opacity:0;transform:scale(.4) rotate(-18deg);filter:blur(20px)}60%{opacity:1}100%{opacity:1;transform:none;filter:blur(0)}}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-12px) rotate(1.5deg)}}
+
+.sin-name{
+  margin-top:14px;font-size:clamp(38px,11vw,50px);font-weight:200;letter-spacing:.2em;text-indent:.2em;
+  background:linear-gradient(180deg,#fff,var(--accent));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 26px var(--accent-soft));
+  animation:fadeUp .8s .25s both;
+}
+.sin-en{
+  margin-top:10px;font-size:10px;letter-spacing:.6em;text-indent:.6em;
+  color:var(--accent);opacity:.75;animation:fadeUp .8s .35s both;
+}
+.sin-tag{
+  margin-top:20px;font-size:14px;letter-spacing:.14em;color:rgba(215,208,232,.7);
+  text-align:center;animation:fadeUp .8s .45s both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+.divider-sm{
+  width:100%;height:1px;margin:36px 0 28px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);
+}
+
+.bars{width:100%;display:flex;flex-direction:column;gap:13px;animation:fadeUp .8s .55s both}
+.bar-row{display:flex;align-items:center;gap:12px}
+.bar-name{width:44px;font-size:12px;color:rgba(215,208,232,.62);letter-spacing:.06em;flex-shrink:0}
+.bar-track{flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.bar-fill{
+  height:100%;width:0;border-radius:3px;
+  background:linear-gradient(90deg,var(--c1),var(--c2));
+  box-shadow:0 0 12px var(--c2);
+  transition:width 1.2s cubic-bezier(.2,.8,.2,1);
+}
+.bar-pct{width:38px;text-align:right;font-size:11px;color:rgba(215,208,232,.45);flex-shrink:0}
+
+.analysis{width:100%;margin-top:34px;display:flex;flex-direction:column;gap:26px;animation:fadeUp .8s .65s both}
+.block{
+  position:relative;padding:20px 20px 20px 22px;border-radius:14px;
+  background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.012));
+  border:1px solid rgba(255,255,255,.06);
+}
+.block::before{
+  content:'';position:absolute;left:0;top:18px;bottom:18px;width:2px;border-radius:2px;
+  background:linear-gradient(180deg,transparent,var(--accent),transparent);
+}
+.block-title{
+  font-size:11px;letter-spacing:.34em;color:var(--accent);opacity:.9;margin-bottom:12px;
+}
+.block-text{font-size:14.5px;line-height:2.05;color:rgba(222,217,235,.8);letter-spacing:.02em;font-weight:300}
+
+.quote{
+  margin-top:34px;padding:24px 22px;width:100%;text-align:center;border-radius:14px;
+  background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(255,77,141,.05));
+  border:1px solid rgba(167,139,250,.2);
+  font-size:15px;line-height:1.9;letter-spacing:.08em;color:rgba(240,236,252,.9);
+  animation:fadeUp .8s .75s both;
+}
+.quote small{display:block;margin-top:10px;font-size:10px;letter-spacing:.5em;color:rgba(167,139,250,.6)}
+
+.actions{margin-top:38px;width:100%;display:flex;flex-direction:column;gap:14px;animation:fadeUp .8s .85s both}
+.btn-save{
+  width:100%;padding:18px;border-radius:14px;cursor:pointer;font-family:inherit;
+  font-size:14px;letter-spacing:.32em;text-indent:.32em;
+  color:#0d0817;font-weight:600;
+  background:linear-gradient(120deg,#c4b5fd,#a78bfa 45%,#f9a8d4);
+  border:none;
+  box-shadow:0 8px 36px rgba(167,139,250,.4);
+  transition:.3s;position:relative;overflow:hidden;
+}
+.btn-save:active{transform:scale(.975);box-shadow:0 4px 20px rgba(167,139,250,.35)}
+.btn-ghost{
+  width:100%;padding:15px;border-radius:14px;cursor:pointer;font-family:inherit;
+  font-size:12px;letter-spacing:.3em;text-indent:.3em;
+  color:rgba(200,192,220,.6);background:transparent;
+  border:1px solid rgba(255,255,255,.1);transition:.3s;
+}
+.btn-ghost:active{transform:scale(.975);background:rgba(255,255,255,.04)}
+
+/* ============ 保存预览 ============ */
+#preview{
+  position:fixed;inset:0;z-index:80;background:rgba(4,3,8,.94);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;padding:30px 20px;
+  opacity:0;pointer-events:none;transition:opacity .35s;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+#preview.on{opacity:1;pointer-events:auto}
+#preview img{
+  max-width:100%;max-height:66vh;border-radius:16px;
+  box-shadow:0 0 60px rgba(140,100,255,.35);
+  animation:prevIn .5s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes prevIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+.preview-tip{font-size:12px;letter-spacing:.28em;color:rgba(210,200,235,.75);text-align:center}
+.preview-tip span{color:var(--accent)}
+.preview-close{
+  padding:12px 44px;border-radius:999px;border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.05);color:rgba(230,225,245,.8);
+  font-family:inherit;font-size:12px;letter-spacing:.3em;text-indent:.3em;cursor:pointer;
+}
+@media(max-height:680px){
+  .demon-stage{width:min(46vw,190px)}
+  .q-text{font-size:18px;margin-bottom:24px}
+  .option{padding:14px 18px;font-size:13.5px}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="aurora"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+<div class="noise"></div>
+<div class="vignette"></div>
+
+<!-- ========== 开始页 ========== -->
+<section id="start" class="screen active">
+  <div class="start-inner">
+    <div class="rune">✦ ✦ ✦</div>
+    <h1 class="title-main">七宗罪</h1>
+    <div class="title-en">THE SEVEN DEADLY SINS</div>
+    <div class="divider"></div>
+    <p class="desc">每个人的心底<br>都养着一只小小的恶魔<br>它不吓人，只是有点坏</p>
+    <button class="btn btn-start" id="btnStart">开 始 测 试</button>
+    <p class="hint">15 道题 · 约 2 分钟 · 可保存结果图</p>
+  </div>
+</section>
+
+<!-- ========== 答题页 ========== -->
+<section id="quiz" class="screen">
+  <div class="quiz-head">
+    <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+    <div class="counter"><b id="qNow">1</b> / 15</div>
+  </div>
+  <div class="quiz-body" id="quizBody">
+    <div class="q-num" id="qNum">Q.01</div>
+    <h2 class="q-text" id="qText"></h2>
+    <div class="options" id="options"></div>
+  </div>
+</section>
+
+<!-- ========== 计算中 ========== -->
+<div id="calc">
+  <div class="calc-ring"></div>
+  <div class="calc-text" id="calcText">正在解析你的暗面</div>
+  <div class="calc-bar"><i id="calcBar"></i></div>
+</div>
+
+<!-- ========== 结果页 ========== -->
+<section id="result" class="screen">
+  <div class="result-inner">
+    <div class="demon-stage" id="demonStage"></div>
+    <div class="sin-name" id="sinName"></div>
+    <div class="sin-en" id="sinEn"></div>
