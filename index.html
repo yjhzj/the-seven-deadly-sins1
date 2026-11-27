@@ -2,595 +2,1203 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#07060b">
-<title>七宗罪 · 灵魂倾向测试</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>七宗罪 · 灵魂底色测试</title>
 <style>
-  /* ============ 基础重置 ============ */
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{min-height:100%;}
-  body{
-    background:#07060b;
-    color:#efeaf7;
-    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
-    -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
-  }
-  button{font-family:inherit;touch-action:manipulation;-webkit-appearance:none;appearance:none;}
-  svg{display:block;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 
-  /* ============ 背景层 ============ */
-  #bg{
-    position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
-    background:radial-gradient(circle at 50% 0%,#1a1026 0%,#0a0810 45%,#050409 100%);
-  }
-  .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.42;will-change:transform;}
-  .orb.a{width:340px;height:340px;background:#6d3bd1;top:-130px;left:-100px;animation:float1 17s ease-in-out infinite;}
-  .orb.b{width:300px;height:300px;background:#c1336b;bottom:-120px;right:-110px;animation:float2 21s ease-in-out infinite;}
-  .orb.c{width:250px;height:250px;background:#1f5fa8;top:40%;left:62%;animation:float1 26s ease-in-out infinite reverse;}
-  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(46px,64px) scale(1.08);}}
-  @keyframes float2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-54px,-46px) scale(1.1);}}
+:root{
+  --bg:#07050a;
+  --ink:#eae4f0;
+  --dim:#8a7f9b;
+  --gold:#c9a86a;
+  --purple:#b28ce0;
+  --serif:"Songti SC","STSong","Noto Serif SC",Georgia,"Times New Roman",serif;
+  --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,BlinkMacSystemFont,sans-serif;
+}
 
-  .star{position:absolute;background:#fff;border-radius:50%;animation:twinkle linear infinite;}
-  @keyframes twinkle{0%,100%{opacity:.06;transform:scale(.7);}50%{opacity:.75;transform:scale(1.25);}}
+html,body{height:100%;}
 
-  #grain{
-    position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.045;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
 
-  /* ============ 屏幕容器 ============ */
-  .screen{
-    position:relative;z-index:2;
-    display:none;
-    flex-direction:column;
-    min-height:100vh;
-    min-height:100dvh;
-    padding:0 22px;
-  }
-  .screen.active{display:flex;}
-  .inner{
-    width:100%;
-    max-width:520px;
-    margin:auto;
-    padding:46px 0;
-    animation:screenIn .7s cubic-bezier(.16,.84,.44,1);
-  }
-  @keyframes screenIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:none;}}
+/* ---------- 背景层 ---------- */
+.bg-glow{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% -8%, rgba(122,72,182,.30), transparent 70%),
+    radial-gradient(ellipse 60% 45% at 50% 108%, rgba(190,130,70,.13), transparent 70%),
+    radial-gradient(ellipse 110% 110% at 50% 50%, #0e0913 0%, #07050a 58%, #04030a 100%);
+}
+#fx{position:fixed;inset:0;z-index:1;pointer-events:none;}
+.grain{
+  position:fixed;inset:-60%;z-index:2;pointer-events:none;opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grainShift 9s steps(6) infinite;
+}
+@keyframes grainShift{
+  0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}
+  60%{transform:translate(-2%,-2%)}80%{transform:translate(3%,1%)}100%{transform:translate(0,0)}
+}
 
-  /* ============ 通用文字 ============ */
-  .kicker{
-    font-size:10.5px;letter-spacing:.44em;text-transform:uppercase;
-    color:rgba(239,234,247,.4);font-weight:500;margin-bottom:20px;
-  }
+/* ---------- 屏幕框架 ---------- */
+#app{position:relative;z-index:3;height:100vh;height:100dvh;}
 
-  /* ============ 封面 ============ */
-  .intro-inner{text-align:center;}
-  .seal{
-    width:84px;height:84px;margin:0 auto 34px;position:relative;
-    display:flex;align-items:center;justify-content:center;
-    border-radius:50%;
-    border:1px solid rgba(185,140,255,.35);
-    background:radial-gradient(circle at 50% 40%,rgba(185,140,255,.22),transparent 70%);
-    box-shadow:0 0 46px rgba(140,80,255,.35),inset 0 0 24px rgba(185,140,255,.18);
-    animation:sealPulse 3.6s ease-in-out infinite;
-  }
-  @keyframes sealPulse{
-    0%,100%{box-shadow:0 0 40px rgba(140,80,255,.3),inset 0 0 20px rgba(185,140,255,.14);}
-    50%{box-shadow:0 0 70px rgba(160,95,255,.6),inset 0 0 30px rgba(185,140,255,.3);}
-  }
-  .seal svg{width:46px;height:46px;}
+.screen{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  padding:38px 26px;
+  overflow-y:auto;overflow-x:hidden;
+  opacity:0;pointer-events:none;
+  transition:opacity .75s ease;
+}
+.screen::-webkit-scrollbar{display:none;}
+.screen.active{opacity:1;pointer-events:auto;}
 
-  h1{
-    font-size:42px;font-weight:600;letter-spacing:.1em;line-height:1.2;
-    background:linear-gradient(180deg,#ffffff 0%,#c9a2ff 62%,#7d5bb5 100%);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-  }
-  h1 span{
-    display:block;margin-top:16px;
-    font-size:13px;font-weight:400;letter-spacing:.5em;
-    -webkit-text-fill-color:rgba(239,234,247,.55);color:rgba(239,234,247,.55);
-  }
-  .lead{
-    margin:30px auto 0;max-width:300px;
-    font-size:14px;line-height:2;color:rgba(239,234,247,.6);letter-spacing:.04em;
-  }
+.wrap{margin:auto;width:100%;max-width:520px;position:relative;}
 
-  .btn-primary{
-    position:relative;display:flex;align-items:center;justify-content:center;
-    width:100%;max-width:300px;margin:44px auto 0;
-    padding:17px 26px;border:none;border-radius:999px;
-    background:linear-gradient(135deg,#b98cff 0%,#7a4fd6 52%,#c1336b 100%);
-    color:#fff;font-size:14.5px;font-weight:500;letter-spacing:.26em;text-indent:.26em;
-    cursor:pointer;
-    box-shadow:0 12px 44px rgba(140,80,255,.36),inset 0 1px 0 rgba(255,255,255,.32);
-    transition:transform .25s cubic-bezier(.2,.8,.2,1);
-    animation:btnPulse 3.4s ease-in-out infinite;
-  }
-  .btn-primary:active{transform:scale(.965);}
-  @keyframes btnPulse{
-    0%,100%{box-shadow:0 12px 44px rgba(140,80,255,.32),inset 0 1px 0 rgba(255,255,255,.3);}
-    50%{box-shadow:0 12px 64px rgba(160,95,255,.62),inset 0 1px 0 rgba(255,255,255,.4);}
-  }
-  .hint{margin-top:20px;font-size:11px;letter-spacing:.3em;color:rgba(239,234,247,.3);}
+/* ---------- 通用按钮 ---------- */
+.btn{
+  position:relative;
+  display:inline-block;
+  padding:17px 56px;
+  background:transparent;
+  border:1px solid rgba(201,168,106,.42);
+  color:#e8dcc4;
+  font-family:var(--sans);
+  font-size:12.5px;
+  letter-spacing:.36em;
+  text-indent:.36em;
+  cursor:pointer;
+  overflow:hidden;
+  transition:border-color .45s,box-shadow .45s,color .45s,transform .25s;
+}
+.btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(201,168,106,.20),transparent);
+  transform:translateX(-120%);
+  transition:transform .75s cubic-bezier(.4,0,.2,1);
+}
+.btn:hover{
+  border-color:rgba(201,168,106,.92);
+  color:#fff;
+  box-shadow:0 0 34px rgba(201,168,106,.22),inset 0 0 22px rgba(201,168,106,.09);
+}
+.btn:hover::before{transform:translateX(120%);}
+.btn:active{transform:scale(.975);}
 
-  /* ============ 答题 ============ */
-  .quiz-top{display:flex;align-items:center;gap:14px;margin-bottom:30px;}
-  .q-index{
-    font-size:11.5px;letter-spacing:.18em;white-space:nowrap;
-    color:rgba(239,234,247,.5);font-variant-numeric:tabular-nums;
-  }
-  .progress{flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;}
-  .progress i{
-    display:block;height:100%;width:0;border-radius:99px;
-    background:linear-gradient(90deg,#b98cff,#ff6fa5);
-    box-shadow:0 0 14px rgba(185,140,255,.75);
-    transition:width .55s cubic-bezier(.4,0,.2,1);
-  }
+/* ---------- 开场页 ---------- */
+.intro{text-align:center;}
+.kicker{
+  font-size:9.5px;letter-spacing:.52em;text-indent:.52em;
+  color:#6b5f7d;margin-bottom:36px;font-weight:500;
+}
+.title{
+  font-family:var(--serif);
+  font-size:clamp(58px,17vw,86px);
+  line-height:.95;
+  font-weight:600;
+  letter-spacing:.06em;text-indent:.06em;
+  background:linear-gradient(172deg,#fcf8ff 0%,#cdb3f2 38%,#8a63c4 72%,#553a7d 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:titlePulse 4.5s ease-in-out infinite;
+}
+@keyframes titlePulse{
+  0%,100%{filter:drop-shadow(0 0 26px rgba(150,100,220,.24));}
+  50%{filter:drop-shadow(0 0 58px rgba(175,125,245,.52));}
+}
+.title-sub{
+  margin-top:22px;
+  font-size:12px;letter-spacing:.62em;text-indent:.62em;
+  color:#a294b8;font-weight:300;
+}
+.rule{
+  width:56px;height:1px;margin:34px auto;
+  background:linear-gradient(90deg,transparent,rgba(201,168,106,.85),transparent);
+}
+.desc{
+  font-size:13.5px;line-height:2.15;color:#8f849f;
+  letter-spacing:.05em;margin-bottom:52px;
+}
+.desc b{color:#c9a86a;font-weight:500;}
+.foot{
+  margin-top:56px;
+  font-size:9px;letter-spacing:.4em;color:#4d4459;
+}
 
-  .q-card.q-anim{animation:qIn .55s cubic-bezier(.16,.84,.44,1);}
-  @keyframes qIn{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:none;}}
+/* ---------- 题目页 ---------- */
+.q-top{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-size:9.5px;letter-spacing:.28em;color:#665a78;
+  margin-bottom:15px;
+}
+.q-top b{color:var(--gold);font-weight:600;font-size:12px;letter-spacing:.1em;}
+.track{
+  height:1.5px;background:rgba(255,255,255,.06);
+  border-radius:2px;overflow:hidden;margin-bottom:52px;
+}
+.track>i{
+  display:block;height:100%;width:0;
+  background:linear-gradient(90deg,#5c3f8c,#b28ce0,#f0dcff);
+  box-shadow:0 0 14px rgba(178,140,224,.85);
+  transition:width .65s cubic-bezier(.4,0,.2,1);
+}
+.q-text{
+  font-family:var(--serif);
+  font-size:21px;line-height:1.72;font-weight:500;
+  color:#f0eaf7;letter-spacing:.02em;
+  margin-bottom:38px;
+}
 
-  .q-text{
-    font-size:20px;line-height:1.65;font-weight:500;
-    letter-spacing:.02em;margin-bottom:28px;
-  }
+.opt{
+  position:relative;
+  display:flex;gap:16px;align-items:flex-start;
+  width:100%;text-align:left;
+  padding:18px 20px;margin-bottom:11px;
+  background:rgba(255,255,255,.024);
+  border:1px solid rgba(255,255,255,.065);
+  color:#c8bfd6;
+  font-family:var(--sans);
+  font-size:14px;line-height:1.62;
+  cursor:pointer;overflow:hidden;
+  transition:background .35s,border-color .35s,color .35s,transform .35s,box-shadow .35s,opacity .4s;
+  animation:optIn .55s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes optIn{from{opacity:0;transform:translateX(-14px);}to{opacity:1;transform:translateX(0);}}
+.opt .k{
+  font-family:Georgia,serif;font-size:11px;letter-spacing:.1em;
+  color:#7c6d90;flex-shrink:0;padding-top:3px;
+  transition:color .35s;
+}
+.opt:hover{
+  background:rgba(178,140,224,.075);
+  border-color:rgba(178,140,224,.42);
+  color:#fff;
+  transform:translateX(5px);
+  box-shadow:0 0 30px rgba(178,140,224,.13),inset 0 0 26px rgba(178,140,224,.05);
+}
+.opt:hover .k{color:var(--gold);}
+.opt:active{transform:translateX(5px) scale(.99);}
 
-  .option{
-    position:relative;display:flex;align-items:flex-start;gap:14px;
-    width:100%;padding:17px 18px;margin-bottom:12px;
-    border:1px solid rgba(255,255,255,.085);border-radius:16px;
-    background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.014));
-    color:rgba(239,234,247,.87);
-    font-size:14.5px;line-height:1.65;text-align:left;
-    cursor:pointer;overflow:hidden;
-    transition:border-color .28s,background .28s,transform .28s,box-shadow .28s;
-  }
-  .option:active{transform:scale(.985);}
-  .option.selected{
-    border-color:rgba(185,140,255,.9);
-    background:rgba(185,140,255,.15);
-    box-shadow:0 0 28px rgba(185,140,255,.4),inset 0 0 20px rgba(185,140,255,.12);
-  }
-  .opt-mark{
-    flex:none;width:22px;height:22px;margin-top:2px;border-radius:50%;
-    border:1px solid rgba(255,255,255,.22);
-    display:flex;align-items:center;justify-content:center;
-    font-size:10.5px;color:rgba(239,234,247,.5);
-    transition:all .28s;
-  }
-  .option.selected .opt-mark{
-    background:linear-gradient(135deg,#b98cff,#ff6fa5);
-    border-color:transparent;color:#fff;
-    box-shadow:0 0 16px rgba(185,140,255,.9);
-  }
-  .opt-text{flex:1;}
-  @media (hover:hover){
-    .option:hover{border-color:rgba(185,140,255,.45);background:rgba(185,140,255,.085);transform:translateY(-2px);}
-  }
+.opt.picked{
+  background:rgba(201,168,106,.11);
+  border-color:rgba(201,168,106,.62);
+  color:#fff;
+  box-shadow:0 0 34px rgba(201,168,106,.24),inset 0 0 26px rgba(201,168,106,.08);
+}
+.opt.picked .k{color:var(--gold);}
+.opt.dim{opacity:.22;filter:blur(.4px);}
 
-  /* ============ 分析中 ============ */
-  .loading-inner{text-align:center;}
-  .ring{
-    width:96px;height:96px;margin:0 auto 38px;border-radius:50%;
-    background:conic-gradient(from 0deg,#b98cff,#ff6fa5,#7fb0ff,#b98cff);
-    -webkit-mask:radial-gradient(circle,transparent 61%,#000 62%);
-    mask:radial-gradient(circle,transparent 61%,#000 62%);
-    animation:spin 2.4s linear infinite;
-    filter:drop-shadow(0 0 22px rgba(160,95,255,.6));
-  }
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .loading-text{
-    font-size:13.5px;letter-spacing:.24em;
-    color:rgba(239,234,247,.62);margin-bottom:28px;min-height:20px;
-  }
-  .loading-bar{
-    width:200px;height:2px;margin:0 auto;border-radius:99px;
-    background:rgba(255,255,255,.08);overflow:hidden;
-  }
-  .loading-bar i{
-    display:block;height:100%;width:0;border-radius:99px;
-    background:linear-gradient(90deg,#b98cff,#ff6fa5);
-    box-shadow:0 0 12px rgba(185,140,255,.8);
-  }
+.ripple{
+  position:absolute;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,168,106,.55),transparent 70%);
+  transform:translate(-50%,-50%) scale(0);
+  pointer-events:none;
+  animation:rip .65s ease-out forwards;
+}
+@keyframes rip{to{transform:translate(-50%,-50%) scale(1);opacity:0;}}
 
-  /* ============ 结果 ============ */
-  #screen-result{--sin-color:#b98cff;}
-  .result-inner{text-align:center;}
+/* ---------- 加载页 ---------- */
+.loading{text-align:center;}
+.ring{width:130px;height:130px;margin:0 auto 46px;display:block;}
+.ring-fill{
+  stroke-dasharray:339.29;
+  stroke-dashoffset:339.29;
+  filter:drop-shadow(0 0 6px rgba(201,168,106,.8));
+}
+.ring-fill.go{animation:ringFill 2.6s cubic-bezier(.4,0,.25,1) forwards;}
+@keyframes ringFill{to{stroke-dashoffset:0;}}
+.ring-spin{
+  transform-origin:60px 60px;
+  animation:spin 3.6s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-  .demon-wrap{
-    width:186px;height:186px;margin:6px auto 14px;
-    color:var(--sin-color);
-    filter:drop-shadow(0 0 26px currentColor);
-    animation:demonIn 1s cubic-bezier(.16,1.12,.42,1) both;
-  }
-  .demon-wrap svg{width:100%;height:100%;animation:floaty 4.6s ease-in-out infinite;}
-  @keyframes demonIn{
-    0%{opacity:0;transform:scale(.55) rotate(-12deg);}
-    62%{opacity:1;transform:scale(1.06) rotate(3deg);}
-    100%{opacity:1;transform:scale(1) rotate(0);}
-  }
-  @keyframes floaty{0%,100%{transform:translateY(0) rotate(-1.4deg);}50%{transform:translateY(-9px) rotate(1.4deg);}}
+.load-text{
+  font-family:var(--serif);
+  font-size:15px;letter-spacing:.18em;color:#a99bbd;
+  min-height:24px;
+  transition:opacity .3s;
+}
+.load-sub{
+  margin-top:20px;font-size:9px;letter-spacing:.42em;color:#4d4459;
+}
 
-  .sin-name{
-    font-size:34px;font-weight:600;letter-spacing:.2em;text-indent:.2em;
-    color:var(--sin-color);
-    text-shadow:0 0 30px color-mix(in srgb,var(--sin-color) 55%,transparent);
-  }
-  .sin-latin{
-    margin-top:10px;font-size:10.5px;letter-spacing:.46em;text-transform:uppercase;
-    color:rgba(239,234,247,.35);
-  }
-  .sin-tagline{
-    margin:24px auto 38px;max-width:370px;
-    font-size:13.5px;line-height:2;color:rgba(239,234,247,.7);letter-spacing:.03em;
-  }
+/* ---------- 结果页 ---------- */
+.res-head{text-align:center;margin-bottom:6px;}
+.res-kicker{
+  font-size:9px;letter-spacing:.48em;text-indent:.48em;
+  color:#5f5473;margin-bottom:26px;
+}
+.res-label{
+  font-size:11px;letter-spacing:.42em;text-indent:.42em;
+  color:#8a7f9b;margin-bottom:18px;
+}
+.res-name{
+  font-family:var(--serif);
+  font-size:clamp(46px,13vw,62px);
+  font-weight:600;letter-spacing:.14em;text-indent:.14em;
+  line-height:1.1;
+  background:linear-gradient(170deg,#ffffff 0%,#e6d9ff 45%,#a98ad8 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 34px rgba(160,110,230,.45));
+}
+.res-en{
+  margin-top:12px;
+  font-family:Georgia,serif;
+  font-size:11px;letter-spacing:.62em;text-indent:.62em;
+  color:#7d6f92;
+}
 
-  .block{
-    text-align:left;
-    padding:22px 20px;margin-bottom:13px;
-    border:1px solid rgba(255,255,255,.075);border-radius:18px;
-    background:linear-gradient(160deg,rgba(255,255,255,.052),rgba(255,255,255,.014));
-    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  }
-  .block h3{
-    font-size:11px;font-weight:500;letter-spacing:.3em;
-    color:rgba(239,234,247,.4);margin-bottom:13px;
-  }
-  .block p{font-size:14px;line-height:1.98;color:rgba(239,234,247,.8);}
-  #screen-result.active .block{animation:blockIn .6s cubic-bezier(.16,.84,.44,1) both;}
-  @keyframes blockIn{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:none;}}
+.demon-wrap{
+  position:relative;
+  width:210px;height:230px;
+  margin:26px auto 0;
+  animation:demonIn 1.25s cubic-bezier(.2,.9,.3,1.15) both;
+}
+@keyframes demonIn{
+  0%{opacity:0;transform:scale(.35) translateY(34px);filter:blur(10px);}
+  62%{opacity:1;transform:scale(1.07) translateY(0);filter:blur(0);}
+  100%{opacity:1;transform:scale(1);}
+}
+.demon-wrap::after{
+  content:'';position:absolute;inset:-30px;border-radius:50%;
+  background:radial-gradient(circle,rgba(178,140,224,.20),transparent 68%);
+  animation:halo 3.6s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes halo{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.14);opacity:1}}
+.demon-wrap svg{width:100%;height:100%;display:block;animation:float 4.2s ease-in-out infinite;position:relative;z-index:1;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
 
-  .tags{display:flex;flex-wrap:wrap;gap:8px;}
-  .tag{
-    padding:7px 14px;border-radius:99px;font-size:12px;letter-spacing:.04em;
-    border:1px solid color-mix(in srgb,var(--sin-color) 34%,transparent);
-    background:color-mix(in srgb,var(--sin-color) 12%,transparent);
-    color:color-mix(in srgb,var(--sin-color) 78%,#ffffff);
-  }
+.demon-name{
+  text-align:center;
+  font-family:var(--serif);
+  font-size:16px;letter-spacing:.28em;text-indent:.28em;
+  color:#e3d8f2;margin-top:6px;
+}
+.demon-tag{
+  text-align:center;
+  font-size:12.5px;letter-spacing:.2em;
+  color:#8f80a6;margin-top:14px;
+}
 
-  .bar-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
-  .bar-row:last-child{margin-bottom:0;}
-  .bar-name{flex:none;width:42px;font-size:12.5px;color:rgba(239,234,247,.62);}
-  .bar-track{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;}
-  .bar-fill{
-    display:block;height:100%;width:0;border-radius:99px;
-    transition:width 1.15s cubic-bezier(.2,.8,.2,1);
-  }
-  .bar-pct{
-    flex:none;width:38px;text-align:right;font-size:11.5px;
-    color:rgba(239,234,247,.42);font-variant-numeric:tabular-nums;
-  }
+.divider{
+  height:1px;margin:38px 0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);
+}
 
-  .btn-ghost{
-    display:block;width:100%;margin-top:26px;padding:16px;
-    border:1px solid rgba(255,255,255,.14);border-radius:999px;
-    background:transparent;color:rgba(239,234,247,.72);
-    font-size:13.5px;letter-spacing:.26em;text-indent:.26em;cursor:pointer;
-    transition:background .3s,transform .25s;
-  }
-  .btn-ghost:active{transform:scale(.975);background:rgba(255,255,255,.05);}
+.block{margin-bottom:34px;}
+.block-title{
+  font-size:9.5px;letter-spacing:.42em;text-indent:.42em;
+  color:#c9a86a;margin-bottom:16px;
+  display:flex;align-items:center;gap:12px;
+}
+.block-title::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,rgba(201,168,106,.35),transparent);
+}
+.block p{
+  font-size:13.5px;line-height:2.15;
+  color:#a99bbd;letter-spacing:.03em;
+}
 
-  .disclaimer{
-    margin-top:24px;font-size:10.5px;letter-spacing:.24em;
-    color:rgba(239,234,247,.22);text-align:center;
-  }
+.quote{
+  font-family:var(--serif);
+  font-size:16px;line-height:1.95;
+  color:#e8dcc4;letter-spacing:.06em;
+  text-align:center;
+  padding:30px 18px;
+  border-top:1px solid rgba(201,168,106,.16);
+  border-bottom:1px solid rgba(201,168,106,.16);
+  background:linear-gradient(180deg,rgba(201,168,106,.035),transparent);
+}
 
-  @media (max-width:360px){
-    h1{font-size:34px;}
-    .q-text{font-size:18px;}
-    .option{font-size:13.5px;padding:15px 16px;}
-  }
+/* 灵魂配方条 */
+.bars{margin-top:6px;}
+.bar-row{
+  display:flex;align-items:center;gap:13px;
+  margin-bottom:13px;
+  font-size:11.5px;
+}
+.bar-name{
+  width:44px;flex-shrink:0;
+  color:#8a7f9b;letter-spacing:.12em;
+  transition:color .4s;
+}
+.bar-track{
+  flex:1;height:3px;border-radius:2px;
+  background:rgba(255,255,255,.055);
+  overflow:hidden;
+}
+.bar-track>i{
+  display:block;height:100%;width:0;border-radius:2px;
+  background:linear-gradient(90deg,rgba(178,140,224,.55),#c9aef0);
+  transition:width 1.3s cubic-bezier(.3,.9,.3,1);
+}
+.bar-val{
+  width:34px;text-align:right;flex-shrink:0;
+  font-family:Georgia,serif;font-size:10.5px;
+  color:#5f5473;letter-spacing:.06em;
+}
+.bar-row.top .bar-name{color:#f0e2c4;font-weight:600;}
+.bar-row.top .bar-track>i{background:linear-gradient(90deg,#c9a86a,#f5e3b8);box-shadow:0 0 12px rgba(201,168,106,.7);}
+.bar-row.top .bar-val{color:#c9a86a;}
+
+.res-foot{
+  text-align:center;
+  font-size:9px;letter-spacing:.38em;
+  color:#413a4d;
+  padding:26px 0 10px;
+  line-height:2.4;
+}
+
+.reveal{opacity:0;transform:translateY(20px);animation:rise .85s cubic-bezier(.2,.8,.2,1) forwards;}
+@keyframes rise{to{opacity:1;transform:translateY(0);}}
+
+.re-btn{
+  display:block;margin:44px auto 0;
+  padding:15px 46px;
+}
+
+@media(max-width:380px){
+  .q-text{font-size:19px;}
+  .opt{font-size:13px;padding:16px 17px;}
+  .desc{font-size:12.5px;}
+}
 </style>
 </head>
 <body>
 
-<div id="bg">
-  <div class="orb a"></div>
-  <div class="orb b"></div>
-  <div class="orb c"></div>
-</div>
-<div id="grain"></div>
+<div class="bg-glow"></div>
+<canvas id="fx"></canvas>
+<div class="grain"></div>
 
-<!-- ========== 封面 ========== -->
-<section id="screen-intro" class="screen active">
-  <div class="inner intro-inner">
-    <div class="seal">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path d="M30 34 C22 16 32 8 40 22" fill="none" stroke="#c9a2ff" stroke-width="4.5" stroke-linecap="round"/>
-        <path d="M70 34 C78 16 68 8 60 22" fill="none" stroke="#c9a2ff" stroke-width="4.5" stroke-linecap="round"/>
-        <ellipse cx="50" cy="56" rx="26" ry="24" fill="none" stroke="#c9a2ff" stroke-width="3.2"/>
-        <path d="M37 52 a6 6 0 0 1 12 0" fill="#c9a2ff"/>
-        <path d="M51 52 a6 6 0 0 1 12 0" fill="#c9a2ff"/>
-        <path d="M42 65 q8 8 16 0" fill="none" stroke="#c9a2ff" stroke-width="3" stroke-linecap="round"/>
+<div id="app">
+
+  <!-- ======== 开场 ======== -->
+  <section class="screen active" id="s-intro">
+    <div class="wrap intro">
+      <div class="kicker">S E V E N &nbsp; D E A D L Y &nbsp; S I N S</div>
+      <h1 class="title">七宗罪</h1>
+      <div class="title-sub">灵 魂 底 色 测 试</div>
+      <div class="rule"></div>
+      <p class="desc">
+        十四道题，七种罪。<br>
+        你以为的<b>坏</b>，也许只是你还没学会怎么用。<br>
+        请在安静的地方，诚实地回答每一个问题。
+      </p>
+      <button class="btn" id="startBtn">开 始 测 试</button>
+      <div class="foot">NO. Ⅶ &nbsp;·&nbsp; SOUL ARCHIVE</div>
+    </div>
+  </section>
+
+  <!-- ======== 答题 ======== -->
+  <section class="screen" id="s-quiz">
+    <div class="wrap" id="qWrap">
+      <div class="q-top">
+        <span>QUESTION <b id="qNo">01</b> / 14</span>
+        <span>SIN · ARCHIVE</span>
+      </div>
+      <div class="track"><i id="qBar"></i></div>
+      <div id="qBody"></div>
+    </div>
+  </section>
+
+  <!-- ======== 加载 ======== -->
+  <section class="screen" id="s-loading">
+    <div class="wrap loading">
+      <svg class="ring" viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="1.2"/>
+        <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="54" fill="none"
+                stroke="#c9a86a" stroke-width="1.6" stroke-linecap="round"
+                transform="rotate(-90 60 60)"/>
+        <g class="ring-spin">
+          <circle cx="60" cy="6" r="2.6" fill="#c9a86a"/>
+        </g>
       </svg>
+      <div class="load-text" id="loadText">正在核对你的选择</div>
+      <div class="load-sub">S O U L &nbsp; S C A N N I N G</div>
     </div>
-    <p class="kicker">Seven Deadly Sins</p>
-    <h1>七宗罪<span>灵魂倾向测试</span></h1>
-    <p class="lead">在十四道选择题里，<br>藏着你最不愿承认的那一面。</p>
-    <button class="btn-primary" id="btn-start" type="button">开始测试</button>
-    <p class="hint">共 14 题 · 约 3 分钟</p>
-  </div>
-</section>
+  </section>
 
-<!-- ========== 答题 ========== -->
-<section id="screen-quiz" class="screen">
-  <div class="inner">
-    <div class="quiz-top">
-      <span class="q-index" id="q-index">01 / 14</span>
-      <div class="progress"><i id="progress-fill"></i></div>
-    </div>
-    <div class="q-card" id="q-card">
-      <h2 class="q-text" id="q-text"></h2>
-      <div class="options" id="options"></div>
-    </div>
-  </div>
-</section>
+  <!-- ======== 结果 ======== -->
+  <section class="screen" id="s-result">
+    <div class="wrap" id="resWrap"></div>
+  </section>
 
-<!-- ========== 分析中 ========== -->
-<section id="screen-loading" class="screen">
-  <div class="inner loading-inner">
-    <div class="ring"></div>
-    <p class="loading-text" id="loading-text">正在读取你的选择…</p>
-    <div class="loading-bar"><i id="loading-fill"></i></div>
-  </div>
-</section>
-
-<!-- ========== 结果 ========== -->
-<section id="screen-result" class="screen">
-  <div class="inner result-inner">
-    <p class="kicker" style="text-align:center;">Your Soul Report</p>
-    <div class="demon-wrap" id="demon-wrap"></div>
-    <h2 class="sin-name" id="sin-name"></h2>
-    <p class="sin-latin" id="sin-latin"></p>
-    <p class="sin-tagline" id="sin-tagline"></p>
-
-    <div class="block">
-      <h3>灵魂底色</h3>
-      <p id="sin-desc"></p>
-    </div>
-    <div class="block">
-      <h3>你的关键词</h3>
-      <div class="tags" id="sin-traits"></div>
-    </div>
-    <div class="block">
-      <h3>你不愿承认的部分</h3>
-      <p id="sin-hidden"></p>
-    </div>
-    <div class="block">
-      <h3>亲密关系里的你</h3>
-      <p id="sin-relation"></p>
-    </div>
-    <div class="block">
-      <h3>给你的忠告</h3>
-      <p id="sin-advice"></p>
-    </div>
-    <div class="block">
-      <h3>七宗罪倾向分布</h3>
-      <div id="bars"></div>
-    </div>
-
-    <button class="btn-ghost" id="btn-restart" type="button">再测一次</button>
-    <p class="disclaimer">本测试仅供娱乐与自我探索</p>
-  </div>
-</section>
+</div>
 
 <script>
-(function () {
-  'use strict';
+/* =========================================================
+   1. 粒子背景
+   ========================================================= */
+(function(){
+  const cvs = document.getElementById('fx');
+  const ctx = cvs.getContext('2d');
+  let W = 0, H = 0, parts = [], raf = null;
 
-  /* =========================================================
-     1. 数据层
-     ========================================================= */
+  const COLORS = ['178,140,224','201,168,106','236,220,255','140,100,200'];
 
-  var SINS = {
-    pride:    { name: '傲慢', latin: 'Superbia', color: '#B58CFF' },
-    greed:    { name: '贪婪', latin: 'Avaritia', color: '#FFCE5C' },
-    lust:     { name: '色欲', latin: 'Luxuria',  color: '#FF6FA5' },
-    envy:     { name: '嫉妒', latin: 'Invidia',  color: '#63E09A' },
-    gluttony: { name: '暴食', latin: 'Gula',     color: '#FF9F45' },
-    wrath:    { name: '暴怒', latin: 'Ira',      color: '#FF5C5C' },
-    sloth:    { name: '懒惰', latin: 'Acedia',   color: '#7FB0FF' }
-  };
+  function resize(){
+    W = cvs.width  = window.innerWidth;
+    H = cvs.height = window.innerHeight;
+    build();
+  }
 
-  var SIN_KEYS = ['pride', 'greed', 'lust', 'envy', 'gluttony', 'wrath', 'sloth'];
-
-  var QUESTIONS = [
-    { q: '深夜刷到一条动态，朋友晒出了你一直想要的东西。你的第一反应是——',
-      options: [
-        { t: '这东西我迟早也会有，而且要比他的更体面。', s: 'pride' },
-        { t: '先算算它值多少钱，转手能不能赚一笔。', s: 'greed' },
-        { t: '如果是喜欢的人送的，那确实会心动。', s: 'lust' },
-        { t: '凭什么是他？我哪一点不如他。', s: 'envy' }
-      ]},
-    { q: '周五加班到九点，你推开家门那一刻，最想做的是——',
-      options: [
-        { t: '点一整桌外卖，吃到彻底不想动为止。', s: 'gluttony' },
-        { t: '打开群聊，把今天受的气一句一句怼回去。', s: 'wrath' },
-        { t: '什么都不干，瘫在沙发上刷到凌晨三点。', s: 'sloth' },
-        { t: '发一条“今天也很拼”，配图修好再发。', s: 'pride' }
-      ]},
-    { q: '抽中一次免费旅行，目的地任选，你会——',
-      options: [
-        { t: '折现。钱比风景实在，还能再滚一滚。', s: 'greed' },
-        { t: '和最想靠近的那个人一起去，气氛最重要。', s: 'lust' },
-        { t: '去那个人去年去过的地方，拍出更好的照片。', s: 'envy' },
-        { t: '直奔美食之都，一天吃五顿，顿顿不重样。', s: 'gluttony' }
-      ]},
-    { q: '有人当众指出你的错误，你的第一反应是——',
-      options: [
-        { t: '立刻反驳，气势上不能输，哪怕我错了。', s: 'wrath' },
-        { t: '回一句“嗯嗯好的”，懒得解释，反正也说不清。', s: 'sloth' },
-        { t: '先记下，下次用结果打他的脸。', s: 'pride' },
-        { t: '先想这件事会不会影响到我的利益。', s: 'greed' }
-      ]},
-    { q: '凌晨一点，手机屏幕还亮着，你在——',
-      options: [
-        { t: '翻着某个人的对话框，打了删，删了打。', s: 'lust' },
-        { t: '看前任或者某个对手的近况，越看越清醒。', s: 'envy' },
-        { t: '等一份夜宵送到楼下，虽然并不饿。', s: 'gluttony' },
-        { t: '因为白天的一句话越想越气，已经在打字了。', s: 'wrath' }
-      ]},
-    { q: '如果能给你一个「不用努力」的特权，你选——',
-      options: [
-        { t: '永远有人替我收拾烂摊子。', s: 'sloth' },
-        { t: '所有人第一眼就对我印象深刻。', s: 'pride' },
-        { t: '想要的东西自动出现在我的账户里。', s: 'greed' },
-        { t: '永远有人为我心动，为我停留。', s: 'lust' }
-      ]},
-    { q: '你最容易在哪种时刻失控——',
-      options: [
-        { t: '看到明明不如我的人，过得比我好。', s: 'envy' },
-        { t: '明明不饿，手却停不下来，一直往嘴里塞。', s: 'gluttony' },
-        { t: '被人插队、被人抢功、被人当空气。', s: 'wrath' },
-        { t: '计划排得满满的，结果一整天什么都没干。', s: 'sloth' }
-      ]},
-    { q: '朋友聚会，你其实最在意的是——',
-      options: [
-        { t: '我今天的状态，是不是全场最好。', s: 'pride' },
-        { t: '这顿谁买单，我能省下多少。', s: 'greed' },
-        { t: '那个我有点在意的人，有没有看我。', s: 'lust' },
-        { t: '谁又换了新包、新工作、新对象。', s: 'envy' }
-      ]},
-    { q: '如果世界今晚就结束，你打算——',
-      options: [
-        { t: '把想吃的全部吃一遍，一个都不放过。', s: 'gluttony' },
-        { t: '去找所有得罪过我的人，把账算清楚。', s: 'wrath' },
-        { t: '躺着。反正也来不及了。', s: 'sloth' },
-        { t: '精心打扮，让世界记住我最后的样子。', s: 'pride' }
-      ]},
-    { q: '你最藏不住的小心思是——',
-      options: [
-        { t: '看到钱和机会时，眼睛会不受控地发亮。', s: 'greed' },
-        { t: '对好看的人，几乎没有抵抗力。', s: 'lust' },
-        { t: '会偷偷把自己和身边的人比一比。', s: 'envy' },
-        { t: '心情一不好，就想吃点好的。', s: 'gluttony' }
-      ]},
-    { q: '别人的评价里，哪一句最像你——',
-      options: [
-        { t: '“你脾气来得比谁都快。”', s: 'wrath' },
-        { t: '“你拖延症已经晚期了。”', s: 'sloth' },
-        { t: '“你有点自我感觉良好。”', s: 'pride' },
-        { t: '“你太会算了。”', s: 'greed' }
-      ]},
-    { q: '收到一条有点暧昧的消息，你的第一反应是——',
-      options: [
-        { t: '立刻回，并且开始想怎么撩回去。', s: 'lust' },
-        { t: '先猜他是不是也这样发给别人。', s: 'envy' },
-        { t: '截图发给朋友，边吃零食边分析。', s: 'gluttony' },
-        { t: '如果他回得慢，我会有点火。', s: 'wrath' }
-      ]},
-    { q: '你的房间或者桌面，现在是什么状态——',
-      options: [
-        { t: '有点乱，但我懒得收，反正还能用。', s: 'sloth' },
-        { t: '摆得很有品味，随时可以拍照发出来。', s: 'pride' },
-        { t: '堆着没拆的快递和“以后会用上”的东西。', s: 'greed' },
-        { t: '有别人留下的东西，我一直没扔。', s: 'lust' }
-      ]},
-    { q: '如果有个恶作剧按钮，你最想按在谁身上——',
-      options: [
-        { t: '那个处处比我好一点点的人。', s: 'envy' },
-        { t: '那个吃饭吧唧嘴还抢我最后一口的人。', s: 'gluttony' },
-        { t: '那个当众让我下不来台的人。', s: 'wrath' },
-        { t: '那个让我明天必须早起的人。', s: 'sloth' }
-      ]}
-  ];
-
-  var RESULTS = {
-    pride: {
-      tagline: '你把自己活成了一座孤岛上的王座——风景很好，风也很大。',
-      desc: '你对自己有一套近乎苛刻的标准，高到别人很难靠近，也高到你自己常常喘不过气。你讨厌被比较，更讨厌被小看。哪怕心里没底，表面也要稳住那份体面。你的自傲不是空穴来风——你确实在很多事上比大多数人做得更好。只是你很少承认：那份“不能输”的执念，有时候比任何人的评价都更折磨你。',
-      traits: ['不轻易示弱', '讨厌被说教', '对成果有洁癖', '嘴上谦虚心里受用'],
-      hidden: '你真正想要的不是“赢”，而是被真正看见——看见你为了维持体面，悄悄付出了多少。',
-      relation: '和你相处的人会觉得你可靠、有分寸，但很难走进最里面那一层。你习惯用“优秀”去换取爱，而不是用“脆弱”。你怕的是：一旦露出破绽，就不值得被喜欢了。',
-      advice: '试着在一个人面前允许自己不完美。你会发现，被看见缺点之后依然被接纳，比被仰望要安心得多。'
-    },
-    greed: {
-      tagline: '你算得很清楚，唯独没算过自己累不累。',
-      desc: '你天生对“更多”敏感——更多的钱、更多的选择权、更多的安全感。别人觉得你精明，其实你只是太早明白了一件事：手里握着的，才是自己的。你很少冲动消费，却会为了一件“能升值”的东西毫不犹豫。你不贪心，你只是怕——怕哪天需要的时候，自己拿不出来。',
-      traits: ['天生会算账', '囤积癖（会员、优惠券、备用方案）', '不轻易借钱', '讨厌浪费'],
-      hidden: '你真正囤的不是东西，是“万一”。万一失业、万一生病、万一没人帮我——你在为所有可能的塌方提前备好沙袋。',
-      relation: '你对亲近的人其实很大方，但你会默默记账——不是要回报，而是要确认“我没有被占便宜”。',
-      advice: '试着留一点“没有用”的东西给自己：一段不产出任何价值的时间，一次不为性价比的选择。'
-    },
-    lust: {
-      tagline: '你要的从来不是谁的身体，而是“被渴望”的那一秒。',
-      desc: '你对美、对暧昧、对被注视的感觉，有着超乎常人的敏感。你很容易心动，也很容易在心动里迷路。你享受关系刚开始时的那种电流感——一个眼神、一句留白的话、一次故意的靠近。你不一定真的想得到谁，你只是需要不断确认：我还有让人心动的能力。',
-      traits: ['容易心动也容易清醒', '对氛围极其敏感', '沉迷暧昧期的张力', '审美是硬门槛'],
-      hidden: '你收集的从来不是人，是“被需要”的证据。当没有人看着你的时候，你会怀疑自己是不是就不存在了。',
-      relation: '你在关系里很会撩，却不太会“待着”。真正的亲密——那些无聊的、素颜的、没有台词的时刻——反而让你想逃。',
-      advice: '试着爱一个不需要你表演的人。也试着在没有观众的时候，好好看看自己。'
-    },
-    envy: {
-      tagline: '你盯着别人的生活，忘了自己也在被谁偷偷羡慕。',
-      desc: '你的眼睛很尖——谁升职了、谁恋爱了、谁看起来毫不费力就拥有了你想要的一切。你说你不比较，但你的手指比谁都快，总在深夜点开那个人的主页。你的嫉妒不是恶意的，它更像一根刺，扎在你“我本来也可以”的地方。',
-      traits: ['观察力惊人', '暗自较劲型选手', '朋友圈考古专家', '骨子里不服输'],
-      hidden: '你嫉妒的从来不是那个人，而是那个人身上，你还没被允许拥有的那一部分自己。',
-      relation: '你在朋友面前是很好的倾听者，但心里有一条隐秘的排行榜。当朋友过得比你好时，你的祝福里会掺着一点点酸——然后你会为此自责很久。',
-      advice: '把“他凭什么”换成“我想要什么”。嫉妒是坐标，不是判决书。'
-    },
-    gluttony: {
-      tagline: '你填满的从来不是胃，是那个说不清在哪儿的洞。',
-      desc: '你懂那种感觉——明明不饿，但手就是停不下来。奶茶、短视频、购物车、无止境的下拉刷新，你需要的不是那个东西本身，而是“被填满”的那一瞬间。你不是控制不住自己，你只是有时候，不太想面对空下来的那几秒。',
-      traits: ['情绪性进食', '深夜觅食专家', '囤零食才有安全感', '嘴上说减肥手里拿筷子'],
-      hidden: '你真正饿的，是一种“被好好照顾”的感觉。当没有人接住你的情绪时，你学会了自己喂自己。',
-      relation: '你很会照顾别人的胃口和情绪，却很少说“我今天不太好”。你更习惯用“一起吃点什么”来代替“抱抱我”。',
-      advice: '下一次想伸手拿东西的时候，先停三十秒，问问自己：我现在到底是饿，还是难过？'
-    },
-    wrath: {
-      tagline: '你的火来得快，去得也快，只剩委屈还留在原地。',
-      desc: '你不是坏人，你只是反应太快。被冒犯的那一秒，你的血先于脑子做出了决定。你摔过门、发过长语音、说过后悔的话，然后在深夜里一遍遍回放，觉得自己像个傻瓜。你的愤怒底下，往往藏着很深的委屈——你只是不太会用别的方式表达“我受伤了”。',
-      traits: ['吃软不吃硬', '当场爆炸当场后悔', '对不公平零容忍', '吵完架自己生闷气'],
-      hidden: '你真正想说的是“你能不能在乎我一点”。但每次话到嘴边，都变成了“随便你”。',
-      relation: '你身边的人会怕你的脾气，但他们也会发现：你气消了之后，是那个最先低头的人。',
-      advice: '生气的时候，先离开现场三分钟。你不需要赢下每一次争执，你需要被听见——而那需要更慢的方式。'
-    },
-    sloth: {
-      tagline: '你不是懒，你只是在等一个值得起身的理由。',
-      desc: '你有很多想法，很多“等我有空就……”。你的收藏夹里躺着一百个计划，你的备忘录里写满了开头。别人说你不思进取，其实你只是——太难被一般的理由打动了。你可以为一件事熬到天亮，也可以为另一件事拖延一整年，区别只在于：那件事有没有真正戳到你。',
-      traits: ['想法很多行动很少', '拖延症晚期', '对无意义的事零耐心', '在喜欢的事上惊人专注'],
-      hidden: '你的“懒”，很多时候是怕。怕做不好，怕努力了也没用，所以干脆不开始——不开始，就永远不算失败。',
-      relation: '你需要一个能推你一把、但不催你的人。你对催促过敏，却会对“我陪你一起”瞬间起身。',
-      advice: '把目标缩小到“只要五分钟”。行动不需要动力，行动会生产动力。'
+  function build(){
+    const n = Math.min(80, Math.max(34, Math.floor(W / 13)));
+    parts = [];
+    for(let i = 0; i < n; i++){
+      parts.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.7 + 0.35,
+        vy: -(Math.random() * 0.28 + 0.05),
+        vx: (Math.random() - 0.5) * 0.14,
+        a: Math.random() * 0.5 + 0.12,
+        tw: Math.random() * Math.PI * 2,
+        ts: Math.random() * 0.02 + 0.006,
+        c: COLORS[Math.floor(Math.random() * COLORS.length)]
+      });
     }
+  }
+
+  function loop(){
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter';
+    for(const p of parts){
+      p.x += p.vx;
+      p.y += p.vy;
+      p.tw += p.ts;
+      if(p.y < -20){ p.y = H + 20; p.x = Math.random() * W; }
+      if(p.x < -20) p.x = W + 20;
+      if(p.x > W + 20) p.x = -20;
+
+      const alpha = p.a * (0.55 + 0.45 * Math.sin(p.tw));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + p.c + ',' + alpha.toFixed(3) + ')';
+      ctx.fill();
+    }
+    raf = requestAnimationFrame(loop);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  loop();
+})();
+
+
+/* =========================================================
+   2. 七宗罪数据
+   ========================================================= */
+const SINS = {
+
+  pride: {
+    key:'pride', name:'傲慢', en:'PRIDE', num:'Ⅰ',
+    demon:'冕 角',
+    colors:{ light:'#cdb3f2', main:'#9b6fdc', dark:'#4d2f7a' },
+    tag:'「我 即 标 准」',
+    quote:'王冠很重，但从来没有人逼你一直戴着。',
+    core:'你的灵魂底色是一整片高纯度的紫。你不是自恋，你只是非常清楚自己值得什么。你有一种近乎本能的自我要求——站着要直，说话要清楚，做事要漂亮。别人以为你骄傲，其实那是你给自己下的死命令。你受不了敷衍、廉价，和"差不多就行"。这种气质让你在人群里天然发光，也让你在没人鼓掌的时候格外难熬。你真正害怕的不是失败，是"掉价"。',
+    light:'审美在线、有主见、不轻易被人 PUA、答应的事一定做到最好。你身上有一种"不会被随便对待"的磁场，这让你在关系和工作里都不容易吃亏。',
+    shadow:'把"被看见"当成刚需；被否定时第一反应是反击而不是思考；很难开口说"我需要帮忙"，因为那在你看来约等于认输。',
+    desire:'希望有一个人，能看见你卸下王冠的样子，还觉得你很好。',
+    guide:'和傲慢型的人相处：别用命令句，把"你应该"换成"你觉得呢"。他们吃软不吃硬，但只吃真诚的软。'
+  },
+
+  envy: {
+    key:'envy', name:'嫉妒', en:'ENVY', num:'Ⅱ',
+    demon:'绿 瞳',
+    colors:{ light:'#a8ecc4', main:'#5fc48e', dark:'#1f6b47' },
+    tag:'「我 只 是 ， 比 较 想 成 为 你」',
+    quote:'你盯着的那道光，其实也在找你的位置。',
+    core:'你是七宗罪里最敏锐的那一个。你总能在别人自己都还没发现之前，就先看见他身上闪光的地方。你的嫉妒，本质上是一种变相的赞美——你嫉妒的，永远是你潜意识里相信自己也能拥有的东西。所以你并不刻薄，你只是太想变好了，好到有点着急。深夜刷到别人的生活时，那种闷闷的感觉，不是恨，是"我也想"。',
+    light:'眼光毒辣、自我驱动力极强、看得见别人的好、进步速度惊人。你天生就知道什么东西是好的，这是很多人一辈子都学不会的天赋。',
+    shadow:'容易在比较里消耗自己；把别人的高光当成自己的失败；偶尔用"我才不稀罕"来掩饰真正的在意。',
+    desire:'想要被肯定，而不是永远被放在天平上比较。',
+    guide:'和嫉妒型的人相处：别在她面前炫耀，也别敷衍地夸。说具体的、真实的细节，她会记很久。'
+  },
+
+  wrath: {
+    key:'wrath', name:'暴怒', en:'WRATH', num:'Ⅲ',
+    demon:'焰 角',
+    colors:{ light:'#ffb3a8', main:'#f4685c', dark:'#8f2a26' },
+    tag:'「别 惹 我 ， 我 很 好 哄」',
+    quote:'你的火，应该用来点灯，而不是烧桥。',
+    core:'你的愤怒来得快，去得也快。你不是脾气差，你是边界感太强。你的怒气本质上是一道防线——当有人越界、当不公发生、当在意的人被欺负，你的血会先一步冲上头顶。你直来直去，吵完就忘，从不在背后下刀。真正让你受伤的，从来不是那件让你生气的事，而是事后你发现：好像只有你一个人在认真。',
+    light:'有正义感、护短、真诚、不玩阴的。你是那种朋友出事会第一时间冲出去的人，这一点极其珍贵。',
+    shadow:'先炸后想；把最坏的脾气留给最亲的人；气头上的话，往往比你想的更伤人。',
+    desire:'想有一个人不怕你发火，还愿意等你冷静下来。',
+    guide:'和暴怒型的人相处：别在她气头上讲道理，先站在她这边。等火灭了，她自己会反思，而且比谁都愧疚。'
+  },
+
+  sloth: {
+    key:'sloth', name:'懒惰', en:'SLOTH', num:'Ⅳ',
+    demon:'眠 角',
+    colors:{ light:'#c3d6ec', main:'#8fa8c8', dark:'#3f5878' },
+    tag:'「我 在 充 电 ， 不 是 关 机」',
+    quote:'你不是在浪费人生，你只是在等一个值得起身的理由。',
+    core:'你的懒，是一种高级的节能模式。你不是没有能力，你是太清楚哪些事不值得你消耗自己。你可以为一件事通宵，也可以为另一件事三年不动——区别只在于，它有没有真正戳到你。你讨厌被催促、被安排、被"效率"绑架。你的灵魂需要大量的留白，才能长出自己的东西。所以别急着给自己贴"废"的标签，你只是还没遇到那件让你心甘情愿的事。',
+    light:'不内耗、情绪稳定、关键时刻超常发挥、有自己的节奏。你是那种平时看着慢悠悠，交出来的东西却让人闭嘴的人。',
+    shadow:'拖延到最后一刻；用"顺其自然"来逃避真正想要的东西；把懒得解释当成默认的沟通方式。',
+    desire:'被允许慢一点，而不被判定为失败。',
+    guide:'和懒惰型的人相处：别催，催了只会更慢。给她一个她真正在意的理由，她能爆发出你想不到的能量。'
+  },
+
+  greed: {
+    key:'greed', name:'贪婪', en:'GREED', num:'Ⅴ',
+    demon:'金 瞳',
+    colors:{ light:'#f7e3a8', main:'#e3bf62', dark:'#8a6a1e' },
+    tag:'「我 要 ， 而 且 我 要 最 好 的」',
+    quote:'你抓得越紧，手心里能装下的东西反而越少。',
+    core:'你的欲望是诚实的。你从不假装清高，你想要钱、想要掌控感、想要"不用看任何人脸色"的自由。你的贪婪本质上是一种高级的安全感追求——你不相信口头承诺，你只相信握在手里的东西。你有极强的目标感和执行力，是那种能在别人还在犹豫时，已经把路走完一半的人。只是你很少告诉别人，你这么拼，是因为你怕。',
+    light:'目标清晰、执行力强、脑子转得快、不画饼只做实事。你说到做到，这在成年人的世界里是稀缺品。',
+    shadow:'很难真正满足；容易把关系也算成得失；偶尔会用"值不值"去衡量一个不该被衡量的人。',
+    desire:'想有一个不用算计、不用权衡、可以放心犯傻的地方。',
+    guide:'和贪婪型的人相处：跟她谈价值，别谈感情绑架。她认的是"值得"，不是"应该"。'
+  },
+
+  gluttony: {
+    key:'gluttony', name:'暴食', en:'GLUTTONY', num:'Ⅵ',
+    demon:'软 角',
+    colors:{ light:'#ffc9d9', main:'#f28aab', dark:'#a04462' },
+    tag:'「先 吃 点 好 的 ， 再 想 人 生」',
+    quote:'有些饿，其实是心在叫你。',
+    core:'你的暴食从来不只关于食物，它关于"填满"。你习惯用感官的满足来安抚情绪——一杯奶茶、一顿火锅、一部剧、一个购物车。你比谁都会照顾自己，也比谁都清楚，那种空落落的感觉，其实不是胃在叫。你是七宗罪里最温柔的一个，因为你知道怎么让一个人开心，也知道一块蛋糕能救回一个糟糕的下午。',
+    light:'懂生活、会照顾人、共情力强、拥有让人快乐的能力。你在的地方，气氛总是软的。',
+    shadow:'用"吃点好的"来回避真正的问题；容易掉进"越难过越吃、越吃越难过"的循环；对自己的身体不够耐心。',
+    desire:'被稳稳地抱一下，什么话都不用说。',
+    guide:'和暴食型的人相处：别在她难过的时候讲道理，先陪她吃一顿。她要的从来不是解决方案，是有人在场。'
+  },
+
+  lust: {
+    key:'lust', name:'色欲', en:'LUST', num:'Ⅶ',
+    demon:'心 角',
+    colors:{ light:'#ff9fbe', main:'#f4457f', dark:'#8f1740' },
+    tag:'「我 一 见 钟 情 ， 我 每 天 一 见 钟 情」',
+    quote:'你要的从来不是爱，是被认真地选中一次。',
+    core:'你的灵魂对"美"和"心动"有着极高的敏感度。你很容易被某个瞬间击中——一个眼神、一段声音、一句没头没尾的话。你不是轻浮，你只是对"活着"这件事有着强烈的感受力。你对爱的渴望，本质上是对"被彻底看见"的渴望。你可以为一个人燃烧，也可以为一个人沉默很久。你比谁都清楚，心动很容易，被懂得很难。',
+    light:'浪漫、有感受力、投入、懂得欣赏。你身上有一种能把普通日子过成电影的能力。',
+    shadow:'容易把心动当成答案；在一段关系里悄悄丢掉自己的边界；明知不对，还是会为那一点点温柔找理由。',
+    desire:'被认真地、唯一地、毫不含糊地选择一次。',
+    guide:'和色欲型的人相处：别跟她玩暧昧，她要的是明确。一句认真的"就是你"，胜过一百句好听的话。'
+  }
+};
+
+
+/* =========================================================
+   3. 恶魔 SVG 生成器
+   ========================================================= */
+function demonSVG(sin){
+  const c = sin.colors;
+  const id = sin.key;
+  const EYE = '#241733';
+
+  /* --- 通用眼睛 --- */
+  const eye = (x, y, look) => {
+    look = look || 0;
+    return '<ellipse cx="' + x + '" cy="' + y + '" rx="7.5" ry="9.5" fill="' + EYE + '"/>' +
+           '<circle cx="' + (x + look) + '" cy="' + (y - 3.5) + '" r="3" fill="#fff"/>' +
+           '<circle cx="' + (x - 2.5) + '" cy="' + (y + 3.2) + '" r="1.3" fill="#fff" opacity=".7"/>';
   };
 
-  /* =========================================================
-     2. 恶魔 SVG 生成
-     ========================================================= */
+  /* --- 四角星 --- */
+  const star = (x, y, s, fill) =>
+    '<path transform="translate(' + x + ',' + y + ') scale(' + s + ')" ' +
+    'd="M0 -10 L2.6 -2.6 L10 0 L2.6 2.6 L0 10 L-2.6 2.6 L-10 0 L-2.6 -2.6 Z" fill="' + fill + '"/>';
 
-  function demonSVG(key) {
-    var c = SINS[key].color;
-    var eyes = '';
-    var mouth = '';
-    var extra = '';
+  /* --- 爱心 --- */
+  const heart = (x, y, s, fill, op) =>
+    '<path transform="translate(' + x + ',' + y + ') scale(' + s + ')" ' +
+    'd="M0 7 C -9 0.5, -11 -6, -5.5 -9.2 C -2.2 -11, 0 -8.2, 0 -6 ' +
+    'C 0 -8.2, 2.2 -11, 5.5 -9.2 C 11 -6, 9 0.5, 0 7 Z" ' +
+    'fill="' + fill + '" opacity="' + (op === undefined ? 1 : op) + '"/>';
 
-    switch (key) {
-      case 'pride':
-        eyes = '<path d="M70 99 a11 11 0 0 1 22 0" fill="' + c + '"/>' +
-               '<path d="M108 99 a11 11 0 0 1 22 0" fill="' + c + '"/>';
-        mouth = '<path d="M84 122 q16 13 32 -3" fill="none" stroke="' + c +
-                '" stroke-width="3.5" stroke-linecap="round"/>';
+  let face = '', deco = '';
+
+  switch(id){
+
+    /* ---------- 傲慢 ---------- */
+    case 'pride':
+      face =
+        '<path d="M73 116 q9.5 -11 19 0" stroke="' + EYE + '" stroke-width="4.5" fill="none" stroke-linecap="round"/>' +
+        '<path d="M108 116 q9.5 -11 19 0" stroke="' + EYE + '" stroke-width="4.5" fill="none" stroke-linecap="round"/>' +
+        '<path d="M93 139 q7 7.5 14 0" stroke="' + EYE + '" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+        '<ellipse cx="68" cy="130" rx="9" ry="5.5" fill="#ff9ec4" opacity=".45"/>' +
+        '<ellipse cx="132" cy="130" rx="9" ry="5.5" fill="#ff9ec4" opacity=".45"/>';
+      deco =
+        /* 皇冠 */
+        '<g transform="translate(100,40)">' +
+          '<path d="M-23 7 L-23 -13 L-11 -3 L0 -19 L11 -3 L23 -13 L23 7 Z" ' +
+                 'fill="#f5dfa0" stroke="#b89440" stroke-width="2.4" stroke-linejoin="round"/>' +
+          '<circle cx="0" cy="-16" r="2.8" fill="#e05c7a"/>' +
+        '</g>' +
+        star(150, 92, 0.62, c.light) +
+        star(52, 108, 0.42, c.light);
+      break;
+
+    /* ---------- 嫉妒 ---------- */
+    case 'envy':
+      face =
+        eye(82, 116, 3.4) + eye(118, 116, 3.4) +
+        '<path d="M93 142 q8 -6 15 1.5" stroke="' + EYE + '" stroke-width="3.6" fill="none" stroke-linecap="round"/>' +
+        '<ellipse cx="68" cy="130" rx="9" ry="5.5" fill="#7fd6a4" opacity=".45"/>' +
+        '<ellipse cx="132" cy="130" rx="9" ry="5.5" fill="#7fd6a4" opacity=".45"/>';
+      deco =
+        star(152, 74, 0.85, '#a8ecc4') +
+        star(166, 52, 0.45, '#7fd6a4') +
+        star(46, 96, 0.5, '#a8ecc4');
+      break;
+
+    /* ---------- 暴怒 ---------- */
+    case 'wrath':
+      face =
+        '<path d="M71 102 L88 111" stroke="' + EYE + '" stroke-width="4.6" stroke-linecap="round"/>' +
+        '<path d="M129 102 L112 111" stroke="' + EYE + '" stroke-width="4.6" stroke-linecap="round"/>' +
+        eye(82, 122) + eye(118, 122) +
+        '<ellipse cx="100" cy="146" rx="10.5" ry="8.5" fill="' + EYE + '"/>' +
+        '<ellipse cx="100" cy="149.5" rx="5" ry="3" fill="#ff8a8a"/>';
+      deco =
+        '<path d="M100 22 C 88 36, 84 46, 93 53 C 90 44, 97 42, 99 36 ' +
+        'C 101 42, 108 44, 105 53 C 114 46, 112 36, 100 22 Z" fill="#ff7a45"/>' +
+        '<path d="M100 34 C 95 42, 94 47, 99 51 C 98 46, 101 45, 102 42 ' +
+        'C 103 45, 106 46, 105 51 C 110 47, 106 42, 100 34 Z" fill="#ffd166"/>';
+      break;
+
+    /* ---------- 懒惰 ---------- */
+    case 'sloth':
+      face =
+        '<path d="M73 117 q9.5 8 19 0" stroke="' + EYE + '" stroke-width="4.2" fill="none" stroke-linecap="round"/>' +
+        '<path d="M108 117 q9.5 8 19 0" stroke="' + EYE + '" stroke-width="4.2" fill="none" stroke-linecap="round"/>' +
+        '<circle cx="100" cy="143" r="5.2" fill="' + EYE + '"/>' +
+        '<ellipse cx="68" cy="130" rx="9" ry="5.5" fill="#9fb8d6" opacity=".45"/>' +
+        '<ellipse cx="132" cy="130" rx="9" ry="5.5" fill="#9fb8d6" opacity=".45"/>';
+      deco =
+        '<path d="M144 62 h15 l-15 13 h15" stroke="#a9c0dc" stroke-width="3.4" ' +
+              'fill="none" stroke-linejoin="round" stroke-linecap="round" opacity=".9"/>' +
+        '<path d="M160 40 h11 l-11 9 h11" stroke="#8fa8c8" stroke-width="2.6" ' +
+              'fill="none" stroke-linejoin="round" stroke-linecap="round" opacity=".6"/>' +
+        '<ellipse cx="100" cy="60" rx="30" ry="7" fill="#ffffff" opacity=".07"/>';
+      break;
+
+    /* ---------- 贪婪 ---------- */
+    case 'greed':
+      face =
+        star(82, 115, 0.85, '#fff3c4') +
+        star(118, 115, 0.85, '#fff3c4') +
+        '<path d="M92 138 q8 6 16 0" stroke="' + EYE + '" stroke-width="3.6" fill="none" stroke-linecap="round"/>';
+      deco =
+        '<g>' +
+          '<ellipse cx="70" cy="150" rx="12" ry="9" fill="' + c.light + '"/>' +
+          '<ellipse cx="130" cy="150" rx="12" ry="9" fill="' + c.light + '"/>' +
+          '<circle cx="100" cy="152" r="16" fill="#f7e3a8" stroke="#b89440" stroke-width="3"/>' +
+          '<circle cx="100" cy="152" r="11" fill="none" stroke="#c9a227" stroke-width="1.6" opacity=".7"/>' +
+          '<text x="100" y="159" text-anchor="middle" font-size="16" font-weight="bold" ' +
+                'font-family="Georgia,serif" fill="#8a6a1e">$</text>' +
+        '</g>' +
+        star(46, 84, 0.5, '#f7e3a8') +
+        star(154, 100, 0.6, '#f7e3a8');
+      break;
+
+    /* ---------- 暴食 ---------- */
+    case 'gluttony':
+      face =
+        '<circle cx="66" cy="132" r="15" fill="' + c.light + '" opacity=".55"/>' +
+        '<circle cx="134" cy="132" r="15" fill="' + c.light + '" opacity=".55"/>' +
+        eye(82, 112, 0) + eye(118, 112, 0) +
+        '<ellipse cx="100" cy="152" rx="17" ry="15" fill="#f7c6d4" stroke="#e08fa8" stroke-width="4.5"/>' +
+        '<ellipse cx="100" cy="152" rx="6.5" ry="5.5" fill="' + EYE + '"/>' +
+        '<circle cx="94" cy="147" r="1.6" fill="#fff" opacity=".85"/>' +
+        '<circle cx="107" cy="149" r="1.4" fill="#fff" opacity=".7"/>';
+      deco =
+        '<path d="M56 78 q6 -10 12 -4" stroke="#ffd7e2" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>' +
+        '<path d="M144 78 q-6 -10 -12 -4" stroke="#ffd7e2" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>';
+      break;
+
+    /* ---------- 色欲 ---------- */
+    case 'lust':
+      face =
+        heart(82, 114, 1.25, '#ff4b7d') +
+        heart(118, 114, 1.25, '#ff4b7d') +
+        '<circle cx="79" cy="110" r="2.2" fill="#fff" opacity=".9"/>' +
+        '<circle cx="115" cy="110" r="2.2" fill="#fff" opacity=".9"/>' +
+        '<path d="M92 140 q8 7 16 0" stroke="' + EYE + '" stroke-width="3.6" fill="none" stroke-linecap="round"/>' +
+        '<ellipse cx="68" cy="130" rx="9" ry="5.5" fill="#ff9fbe" opacity=".5"/>' +
+        '<ellipse cx="132" cy="130" rx="9" ry="5.5" fill="#ff9fbe" opacity=".5"/>';
+      deco =
+        heart(48, 76, 0.85, '#ff9fbe', 0.75) +
+        heart(156, 66, 1.05, '#ff4b7d', 0.65) +
+        heart(40, 118, 0.5, '#ffc9d9', 0.5) +
+        heart(166, 112, 0.62, '#ff9fbe', 0.55);
+      break;
+  }
+
+  return '' +
+  '<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">' +
+    '<defs>' +
+      '<radialGradient id="glow-' + id + '" cx="50%" cy="50%" r="50%">' +
+        '<stop offset="0%" stop-color="' + c.main + '" stop-opacity=".42"/>' +
+        '<stop offset="100%" stop-color="' + c.main + '" stop-opacity="0"/>' +
+      '</radialGradient>' +
+      '<linearGradient id="body-' + id + '" x1="0" y1="0" x2="0.25" y2="1">' +
+        '<stop offset="0%" stop-color="' + c.light + '"/>' +
+        '<stop offset="100%" stop-color="' + c.main + '"/>' +
+      '</linearGradient>' +
+    '</defs>' +
+
+    /* 光晕 */
+    '<ellipse cx="100" cy="120" rx="96" ry="94" fill="url(#glow-' + id + ')"/>' +
+
+    /* 尾巴 */
+    '<path d="M152 150 C 180 160, 190 134, 174 122 C 162 113, 150 124, 158 134" ' +
+          'fill="none" stroke="' + c.dark + '" stroke-width="6" stroke-linecap="round"/>' +
+
+    /* 角 */
+    '<path d="M66 84 C 54 62, 50 46, 56 32 C 67 45, 75 60, 81 72 Z" fill="' + c.dark + '"/>' +
+    '<path d="M134 84 C 146 62, 150 46, 144 32 C 133 45, 125 60, 119 72 Z" fill="' + c.dark + '"/>' +
+
+    /* 脚 */
+    '<ellipse cx="78" cy="174" rx="17" ry="10" fill="' + c.dark + '"/>' +
+    '<ellipse cx="122" cy="174" rx="17" ry="10" fill="' + c.dark + '"/>' +
+
+    /* 身体 */
+    '<ellipse cx="100" cy="122" rx="57" ry="55" fill="url(#body-' + id + ')"/>' +
+
+    /* 高光 */
+    '<ellipse cx="77" cy="95" rx="17" ry="11" fill="#ffffff" opacity=".20" ' +
+             'transform="rotate(-24 77 95)"/>' +
+
+    face +
+    deco +
+  '</svg>';
+}
+
+
+/* =========================================================
+   4. 题库（14题 · 每个选项对应一宗罪）
+   ========================================================= */
+const QUESTIONS = [
+  { q:'凌晨一点，你刷到讨厌的人发了九宫格度假照。',
+    opts:[
+      {t:'拍得一般，我要是去能甩她三条街', s:'pride'},
+      {t:'手指悬在屏幕上，心里有点堵', s:'envy'},
+      {t:'直接划走，并点了「不看她的动态」', s:'wrath'},
+      {t:'继续躺着，跟我没关系', s:'sloth'}
+    ]},
+
+  { q:'发工资的那一天，你最先打开的是——',
+    opts:[
+      {t:'购物车', s:'greed'},
+      {t:'外卖软件', s:'gluttony'},
+      {t:'某个人的聊天框', s:'lust'},
+      {t:'朋友圈，准备发一条', s:'pride'}
+    ]},
+
+  { q:'排队的时候，有人插到了你前面。',
+    opts:[
+      {t:'她凭什么这么理直气壮', s:'envy'},
+      {t:'血一下冲到头顶', s:'wrath'},
+      {t:'算了，多等两分钟又不会死', s:'sloth'},
+      {t:'要是能花钱买优先通道就好了', s:'greed'}
+    ]},
+
+  { q:'凌晨两点你还没睡，因为——',
+    opts:[
+      {t:'冰箱在召唤我', s:'gluttony'},
+      {t:'在聊天记录里反复横跳', s:'lust'},
+      {t:'在回看白天自己的高光时刻', s:'pride'},
+      {t:'在刷别人的生活', s:'envy'}
+    ]},
+
+  { q:'有人在群里内涵你。',
+    opts:[
+      {t:'直接开麦，谁怕谁', s:'wrath'},
+      {t:'关掉手机，眼不见心不烦', s:'sloth'},
+      {t:'截图保存，说不定以后有用', s:'greed'},
+      {t:'气得想立刻点一份炸鸡', s:'gluttony'}
+    ]},
+
+  { q:'地铁上，你遇到一个很好看的陌生人。',
+    opts:[
+      {t:'脑内已经演完一整部偶像剧', s:'lust'},
+      {t:'站直了，顺手理了理头发', s:'pride'},
+      {t:'怎么好看的人运气都这么好', s:'envy'},
+      {t:'有点生气，凭什么他能长这样', s:'wrath'}
+    ]},
+
+  { q:'周末下午三点，你在——',
+    opts:[
+      {t:'床上，还没起', s:'sloth'},
+      {t:'研究怎么搞钱', s:'greed'},
+      {t:'一边吃零食一边刷剧', s:'gluttony'},
+      {t:'精心打扮，准备出门「偶遇」', s:'lust'}
+    ]},
+
+  { q:'你刚走进一个房间，所有人的目光都转了过来。',
+    opts:[
+      {t:'微笑。我知道他们在看什么', s:'pride'},
+      {t:'他们是不是在拿我和谁比较', s:'envy'},
+      {t:'看什么看', s:'wrath'},
+      {t:'希望自己现在还躺在床上', s:'sloth'}
+    ]},
+
+  { q:'如果有一个只能实现一次的愿望，你会许——',
+    opts:[
+      {t:'取之不尽的财富', s:'greed'},
+      {t:'怎么吃都不会胖的身体', s:'gluttony'},
+      {t:'让我爱的人也爱我', s:'lust'},
+      {t:'让所有人都记住我的名字', s:'pride'}
+    ]},
+
+  { q:'刷到一个和你同届的人，年入百万。你——',
+    opts:[
+      {t:'翻出他的每一条动态，试图找破绽', s:'envy'},
+      {t:'手机差点被捏碎', s:'wrath'},
+      {t:'划走，继续我的午睡', s:'sloth'},
+      {t:'开始研究他到底怎么赚的', s:'greed'}
+    ]},
+
+  { q:'便利店的最后一盒限定甜品，被人先一步拿走了。',
+    opts:[
+      {t:'天塌了，我今天必须吃到', s:'gluttony'},
+      {t:'拿的那个人好看，算了', s:'lust'},
+      {t:'我为什么要为一盒甜品难过', s:'pride'},
+      {t:'她是不是故意抢我的', s:'envy'}
+    ]},
+
+  { q:'深夜收到一条「在吗」，你的第一反应是——',
+    opts:[
+      {t:'有事说事，别磨叽', s:'wrath'},
+      {t:'明天再回，先睡', s:'sloth'},
+      {t:'先不回，看看他到底想干嘛', s:'greed'},
+      {t:'一边吃零食一边回', s:'gluttony'}
+    ]},
+
+  { q:'你看到喜欢的人，给别人的朋友圈点了赞。',
+    opts:[
+      {t:'反复点开那条点赞记录', s:'lust'},
+      {t:'我发的他也点了，这就够了', s:'pride'},
+      {t:'那个人到底哪里比我好', s:'envy'},
+      {t:'直接取消关注，眼不见为净', s:'wrath'}
+    ]},
+
+  { q:'如果明天突然不用上班，你会——',
+    opts:[
+      {t:'睡到自然醒，谁也别叫我', s:'sloth'},
+      {t:'搞钱，机会难得', s:'greed'},
+      {t:'去吃一顿好的', s:'gluttony'},
+      {t:'去见那个想见的人', s:'lust'}
+    ]}
+];
+
+
+/* =========================================================
+   5. 流程控制
+   ========================================================= */
+const els = {
+  intro:   document.getElementById('s-intro'),
+  quiz:    document.getElementById('s-quiz'),
+  loading: document.getElementById('s-loading'),
+  result:  document.getElementById('s-result'),
+  qNo:     document.getElementById('qNo'),
+  qBar:    document.getElementById('qBar'),
+  qBody:   document.getElementById('qBody'),
+  resWrap: document.getElementById('resWrap'),
+  loadText:document.getElementById('loadText'),
+  ringFill:document.getElementById('ringFill')
+};
+
+let idx = 0;
+let scores = {};
+let picks = [];
+let locked = false;
+
+function resetState(){
+  idx = 0;
+  locked = false;
+  picks = [];
+  scores = {};
+  Object.keys(SINS).forEach(k => scores[k] = 0);
+}
+
+function show(el){
+  [els.intro, els.quiz, els.loading, els.result].forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  el.scrollTop = 0;
+}
+
+
+/* ---------- 渲染题目 ---------- */
+function renderQuestion(){
+  const q = QUESTIONS[idx];
+  locked = false;
+
+  els.qNo.textContent = String(idx + 1).padStart(2, '0');
+  els.qBar.style.width = ((idx + 1) / QUESTIONS.length * 100) + '%';
+
+  const letters = ['A','B','C','D'];
+
+  let html = '<h2 class="q-text">' + q.q + '</h2><div class="opts">';
+  q.opts.forEach((o, i) => {
+    html += '<button class="opt" data-i="' + i + '" style="animation-delay:' + (i * 70 + 60) + 'ms">' +
+              '<span class="k">' + letters[i] + '</span>' +
+              '<span class="t">' + o.t + '</span>' +
+            '</button>';
+  });
+  html += '</div>';
+
+  els.qBody.innerHTML = html;
+
+  // 入场动画
+  els.qBody.classList.remove('q-in');
+  void els.qBody.offsetWidth;
+  els.qBody.classList.add('q-in');
+
+  els.qBody.querySelectorAll('.opt').forEach(btn => {
+    btn.addEventListener('click', onPick);
+  });
+}
+
+
+/* ---------- 选择答案 ---------- */
+function onPick(e){
+  if(locked) return;
+  locked = true;
+
+  const btn = e.currentTarget;
+  const i = Number(btn.dataset.i);
+  const sin = QUESTIONS[idx].opts[i].s;
+
+  // 涟漪
+  const rect = btn.getBoundingClientRect();
+  const rip = document.createElement('span');
+  rip.className = 'ripple';
+  const size = Math.max(rect.width, rect.height) * 2.4;
+  rip.style.width = rip.style.height = size + 'px';
+  rip.style.left = (e.clientX - rect.left) + 'px';
+  rip.style.top  = (e.clientY - rect.top) + 'px';
+  btn.appendChild(rip);
+
+  // 状态
+  btn.classList.add('picked');
+  els.qBody.querySelectorAll('.opt').forEach(b => {
+    if(b !== btn) b.classList.add('dim');
+  });
+
+  scores[sin] += 1;
+  picks.push(sin);
+
+  setTimeout(() => {
+    idx++;
+    if(idx < QUESTIONS.length){
+      // 出场淡出
+      els.qBody.style.transition = 'opacity .3s, transform .3s';
+      els.qBody.style.opacity = '0';
+      els.qBody.style.transform = 'translateY(-14px)';
+      setTimeout(() => {
+        els.qBody.style.transition = '';
+        els.qBody.style.opacity = '';
+        els.qBody.style.transform = '';
+        renderQuestion();
+      }, 300);
+    } else {
+      startLoading();
+    }
+  }, 430);
+}
+
+
+/* ---------- 加载动画 ---------- */
+const LOAD_TEXTS = [
+  '正在核对你的选择',
+  '正在比对七宗罪的频率',
+  '正在描摹你的灵魂轮廓',
+  '灵魂谱系生成中'
+];
+
+function startLoading(){
+  show(els.loading);
+
+  els.ringFill.classList.remove('go');
+  void els.ringFill.getBoundingClientRect();
+  els.ringFill.classList.add('go');
+
+  let i = 0;
+  els.loadText.textContent = LOAD_TEXTS[0];
+  els.loadText.style.opacity = '1';
+
+  const timer = setInterval(() => {
+    i++;
+    if(i >= LOAD_TEXTS.length){
+      clearInterval(timer);
+      return;
+    }
+    els.loadText.style.opacity = '0';
+    setTimeout(() => {
+      els.loadText.textContent = LOAD_TEXTS[i];
+      els.loadText.style.opacity = '1';
+    }, 260);
+  }, 640);
+
+  setTimeout(() => {
+    clearInterval(timer);
+    showResult();
+  }, 2750);
+}
+
+
+/* ---------- 计算结果 ---------- */
+function calcResult(){
+  let bestKey = null;
+  let bestScore = -1;
+
+  // 第一轮：找最高分
+  Object.keys(SINS).forEach(k => {
+    if(scores[k] > bestScore){
+      bestScore = scores[k];
+      bestKey = k;
+    }
+  });
+
+  // 第二轮：并列时，取"最后一次被选中"的那一个
+  const tied = Object.keys(SINS).filter(k => scores[k] === bestScore);
+  if(tied.length > 1){
+    for(let i = picks.length - 1; i >= 0; i--){
+      if(tied.indexOf(picks[i]) > -1){
+        bestKey = picks[i];
         break;
+      }
+    }
+  }
 
-      case 'greed':
-        eyes = '<circle cx="80" cy="100" r="9" fill="' + c + '"/>' +
-               '<circle cx="120" cy="100" r="9" fill="' + c + '"/>' +
-               '<circle cx="83" cy="97" r="3" fill="#fff" opacity=".85"/>' +
-               '<circle cx="123" cy="97" r="3" fill="#fff" opacity=".85"/>';
-        mouth = '<path d="M86 122 q14 13 28 0" fill="none" stroke="' + c +
-                '" stroke-width="3.5" stroke-linecap="round"/>' +
-                '<ellipse cx="114" cy="137" rx="3" ry="4.5" fill="' + c + '" opacity=".85"/>';
-        break;
+  return bestKey;
+}
 
-      case 'lust':
-        eyes = '<path d="M0 5 C-8 -3 -8 -10 0 -6 C8 -10 8 -3 0 5 Z" transform="translate(80,100)" fill="' + c + '"/>' +
-               '<path d="M0 5 C-8 -3 -8 -10 0 -6 C8 -10 8 -3 0 5 Z" transform="translate(120,100)" fill="' + c + '"/>';
-        mouth = '<path d="M86 123 q14 13 28 -4" fill="none" stroke="' + c +
-                '" stroke-width="3.5" stroke-linecap="round"/>';
-        extra = '<path d="M160 166 c-6 -8 0 -14 4 -10 c4 -4 10 2 4 10 l-4 5 z" fill="' + c + '" opacity=".9"/>';
-        break;
 
-      case 'envy':
-        eyes = '<circle cx="80" cy="100" r="9.5" fill="' + c + '" opacity=".28"/>' +
-               '<circle cx="83.5" cy="101" r="4.2"
+/* ---------- 渲染结果 ---------- */
+function showResult(){
+  const key = calcResult();
+  const sin = SINS[key];
+  const total = QUESTIONS.length;
+
+  const now = new Date();
+  const dateStr = now.getFullYear() + '.' +
+                  String(now.getMonth() + 1).padStart(2, '0') + '.' +
+                  String(now.getDate()).padStart(2, '0');
+
+  // 分数条数据（按分数降序）
+  const list = Object.keys(SINS).map(k => ({
+    k: k,
+    name: SINS[k].name,
+    score: scores[k],
+    pct: Math.round(scores[k] / total * 100)
+  })).sort((a, b) => b.score - a.score);
+
+  let barsHTML = '';
+  list.forEach(item => {
+    const isTop = (item.k === key);
+    barsHTML +=
+      '<div class="bar-row' + (isTop ? ' top' : '') + '">' +
+        '<span class="bar-name">' + item.name + '</span>' +
+        '<span class="bar-track"><i data-w="' + item.pct + '"></i></span>' +
+        '<span class="bar-val">' + item.pct + '</span>' +
+      '</div>';
+  });
+
+  els.resWrap.innerHTML =
+    '<div class="res-head reveal" style="animation-delay:0s">' +
+      '<div class="res-kicker">SOUL ARCHIVE &nbsp;·&nbsp; ' + dateStr + '</div>' +
+      '<div class="res-label">你 的 灵 魂 底 色 是</div>' +
+      '<h1 class="res-name">' + sin.name + '</h1>' +
+      '<div class="res-en">' + sin.en + '</div>' +
+    '</div>' +
+
+    '<div class="demon-wrap" style="animation-delay:.25s">' + demonSVG(sin) + '</div>' +
+
+    '<div class="demon-name reveal" style="animation-delay:1.05s">' + sin.demon + '</div>' +
+    '<div class="demon-tag reveal" style="animation-delay:1.2s">' + sin.tag + '</div>' +
+
+    '<div class="divider reveal" style="animation-delay:1.35s"></div>' +
+
+    '<div class="block reveal" style="animation-delay:1.45s">' +
+      '<div class="block-title">灵 魂 配 方</div>' +
+      '<div class="bars">' + barsHTML + '</div>' +
+    '</div>' +
+
+    '<div class="block reveal" style="animation-delay:1.65s">' +
+      '<div class="block-title">核 心 分 析</div>' +
+      '<p>' + sin.core + '</p>' +
+    '</div>' +
+
+    '<div class="block reveal" style="animation-delay:1.8s">' +
+      '<div class="block-title">你 的 光</div>' +
+      '<p>' + sin.light + '</p>' +
+    '</div>' +
+
+    '<div class="block reveal" style="animation-delay:1.95s">' +
+      '<div class="block-title">你 的 影</div>' +
+      '<p>' + sin.shadow + '</p>' +
+    '</div>' +
+
+    '<div class="block reveal" style="animation-delay:2.1s">' +
+      '<div class="block-title">隐 藏 欲 望</div>' +
+      '<p>' + sin.desire + '</p>' +
+    '</div>' +
+
+    '<div class="block reveal" style="animation-delay:2.25s">' +
+      '<div class="block-title">与 你 相 处</div>' +
+      '<p>' + sin.guide + '</p>' +
+    '</div>' +
+
+    '<div class="quote reveal" style="animation-delay:2.4s">「' + sin.quote + '」</div>' +
+
+    '<button class="btn re-btn reveal" id="reBtn" style="animation-delay:2.6s">再 测 一 次</button>' +
+
+    '<div class="res-foot reveal" style="animation-delay:2.8s">' +
+      'SEVEN DEADLY SINS &nbsp;·&nbsp; SOUL TEST<br>' +
+      '截 图 保 存 你 的 灵 魂 档 案' +
+    '</div>';
+
+  show(els.result);
+
+  // 分数条动画
+  setTimeout(() => {
+    els.resWrap.querySelectorAll('.bar-track > i').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  }, 1750);
+
+  // 重测按钮
+  document.getElementById('reBtn').addEventListener('click', () => {
+    resetState();
+    show(els.intro);
+  });
+}
+
+
+/* =========================================================
+   6. 启动
+   ========================================================= */
+document.getElementById('startBtn').addEventListener('click', () => {
+  resetState();
+  show(els.quiz);
+  renderQuestion();
+});
+
+// 额外：题目区淡入样式
+const styleTag = document.createElement('style');
+styleTag.textContent =
+  '.q-in{animation:qIn .6s cubic-bezier(.2,.8,.2,1) both;}' +
+  '@keyframes qIn{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:translateY(0);}}';
+document.head.appendChild(styleTag);
+</script>
+</body>
+</html>
